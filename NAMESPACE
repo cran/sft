@@ -1,0 +1,11 @@
+# Default NAMESPACE created by R
+# Remove the previous line if you edit this file
+
+# Export all names
+#exportPattern(".")
+export(ARTmic, capacity.and, capacity.or, capacityGroup, estimateNAH, estimateNAK, estimateUCIPor, estimateUCIPand, sic, sicGroup,ucipTest)
+
+# Import all packages listed as Imports or Depends
+import(
+  methods
+)

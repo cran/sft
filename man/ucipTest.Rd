@@ -1,0 +1,66 @@
+\name{ucipTest}
+\alias{ucipTest}
+\title{
+A Statistical Test for Super or Limited Capacity
+}
+\description{
+A nonparametric test for capacity values significantly different than those predicted by the estimated unlimited capacity, independent parallel model.
+}
+\usage{
+ucipTest(RT, CR, OR = TRUE)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{RT}{A list of response time arrays.  The first array in the list is assumed to be the exhaustive condition.}
+  \item{CR}{A list of correct/incorrect indicator arrays.  If NULL, assumes all are correct.}
+  \item{OR}{Logical indicating whether to test against OR (first terminating) or AND (exhaustive) performance.}
+}
+\details{
+The test is based on the Nelson-Aalen formulation of the log-rank test.  The function takes a weighted difference between estimated unlimited capacity, independent parallel performance, based on a participants single source response times, and the participants true performance when all sources are present.
+}
+\value{
+  \item{statistic}{Z-score of a null-hypothesis test for UCIP performance.}
+  \item{p.val}{p-value of a null-hypothesis test for UCIP performance.}
+}
+\references{
+Houpt, J.W. & Townsend, J.T. (2010). The statistical properties of the capacity coefficient. \emph{Journal of Mathematical Psychology, XX}, XXX-XXX.
+}
+\author{
+Joe Houpt <jhoupt@indiana.edu>
+}
+\seealso{
+\code{\link{capacity.or}}
+\code{\link{capacity.and}}
+\code{\link{estimateUCIPor}}
+\code{\link{estimateUCIPand}}
+\code{\link{estimateNAH}}
+\code{\link{estimateNAK}}
+}
+\examples{
+rate1 <- .35
+rate2 <- .3
+RT.pa <- rexp(100, rate1)
+RT.ap <- rexp(100, rate2)
+
+CR.pa <- runif(100) < .98
+CR.ap <- runif(100) < .98
+CR.pp <- runif(100) < .96
+CRlist <- list(CR.pp, CR.pa, CR.ap)
+
+#  OR Processing
+RT.pp.limited <- pmin( rexp(100, .5*rate1), rexp(100, .5*rate2))
+RT.pp.unlimited <- pmin( rexp(100, rate1), rexp(100, rate2))
+RT.pp.super <- pmin( rexp(100, 2*rate1), rexp(100, 2*rate2))
+z.limited   <- ucipTest(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
+z.unlimited <- ucipTest(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
+z.super     <- ucipTest(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
+
+#  AND Processing
+RT.pp.limited <- pmax( rexp(100, .5*rate1), rexp(100, .5*rate2))
+RT.pp.unlimited <- pmax( rexp(100, rate1), rexp(100, rate2))
+RT.pp.super <- pmax( rexp(100, 2*rate1), rexp(100, 2*rate2))
+z.limited   <- ucipTest(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
+z.unlimited <- ucipTest(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
+z.super     <- ucipTest(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
+}
+\keyword{ ~sft }
