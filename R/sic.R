@@ -22,7 +22,8 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
 
     KS <- numeric()
     KSp <- numeric()
-    artp <- numeric()
+    micstat <- numeric()
+    micp <- numeric()
     KSwin <- character()
     N <- numeric()
   } else {
@@ -58,7 +59,8 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
         N <- rbind(N, sicn$N)
         KS  <- rbind(KS,  sicn$Dvals[,1])
         KSp <- rbind(KSp, sicn$Dvals[,2])
-        artp <- c(artp, sicn$MIC[[2]])
+        micstat <- c(micstat, sicn$MIC[[1]])
+        micp <- c(micp, sicn$MIC[[2]])
         Dom[[n]] <- sicn$Dominance
         if (sicn$Dvals[1,2] < .05) {
           if (sicn$Dvals[2,2] < .05) {
@@ -97,7 +99,7 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
   colnames(KS) <- c("D+", "D-")
   colnames(KSp) <- c("D+", "D-")
   statistic <- as.data.frame(list(Subject=KSsubj, Condition=KScond, N=N,
-      Dpositive= KS[,1], p.val.positive=KSp[,1], Dnegative=KS[,2], p.val.negative=KSp[,2], ART=artp, Model=KSwin))
+      Dpositive= KS[,1], p.val.positive=KSp[,1], Dnegative=KS[,2], p.val.negative=KSp[,2], MIC=micstat, p.val.mic=micp, Model=KSwin))
   return(list(statistic=statistic, SIC=sicAllMat, Dominance=Dom, times=times))
 }
 
@@ -110,14 +112,15 @@ sic <- function(HH, HL, LH, LL, sictest="ks", domtest="ks") {
     LL.ecdf <- ecdf(LL)
 
     #if (domtest == "ks") {
-    dominance <-rbind( c((ks.test(HH,HL,alternative="greater")$p < .05), 
-                         (ks.test(HH,LH,alternative="greater")$p < .05),
-                         (ks.test(HL,LL,alternative="greater")$p < .05),
-                         (ks.test(LH,LL,alternative="greater")$p < .05)), 
-                       c((ks.test(HH,HL,alternative="less")$p < .05), 
-                         (ks.test(HH,LH,alternative="less")$p < .05),
-                         (ks.test(HL,LL,alternative="less")$p < .05),
-                         (ks.test(LH,LL,alternative="less")$p < .05)) )
+    dominance<-rbind(c((ks.test(HH,HL,alternative="greater",exact=FALSE)$p<.05),
+                      (ks.test(HH,LH,alternative="greater",exact=FALSE)$p<.05),
+                      (ks.test(HL,LL,alternative="greater",exact=FALSE)$p<.05),
+                      (ks.test(LH,LL,alternative="greater",exact=FALSE)$p<.05)), 
+                     c((ks.test(HH,HL,alternative="less",exact=FALSE)$p<.05), 
+                      (ks.test(HH,LH,alternative="less",exact=FALSE)$p<.05),
+                      (ks.test(HL,LL,alternative="less",exact=FALSE)$p<.05),
+                      (ks.test(LH,LL,alternative="less",exact=FALSE)$p<.05)))
+
     colnames(dominance) <- c("S.hh S.hl", "S.hh S.lh", "S.hl S.ll", "S.lh S.ll")
     rownames(dominance) <- c("<", ">")
     #} else if (domtest=="dp") {
@@ -139,31 +142,45 @@ sic <- function(HH, HL, LH, LL, sictest="ks", domtest="ks") {
       Dvals <- cbind(c(Dplus,Dminus), c(p.Dplus, p.Dminus) )
       colnames(Dvals) <- c("statistic", "p.value")
       rownames(Dvals) <- c("D+", "D-")
-      art <- ARTmic(HH, HL, LH, LL)
-      return(list(SIC=SIC, Dominance=dominance, Dvals=Dvals, MIC=art, N=N))
+      mic <- micTest(HH, HL, LH, LL, ART=FALSE)
+      return(list(SIC=SIC, Dominance=dominance, Dvals=Dvals, MIC=mic, N=N))
     #}
 }
 
 
-ARTmic <- function(HH, HL, LH, LL) {
-    rtall <- c(HH, HL, LH, LL)
-    n1 <- length(HH)
-    n2 <- length(HL)
-    n3 <- length(LH)
-    n4 <- length(LL)
-    h1 <- c(rep(1, n1+n2), rep(0,n3+n4))
-    h2 <- c(rep(1, n1), rep(0, n2), rep(1,n3), rep(0, n4))
-    
-    mA0 <- sum( rtall * (1-h1) ) / sum(1-h1)
-    mA1 <- sum( rtall * h1 ) / sum(h1)
-    mB0 <- sum( rtall * (1-h2) ) / sum(1-h2)
-    mB1 <- sum( rtall * h2 ) / sum(h2)
-    rtall.m <- rtall - (1-h1)*mA0- h1*mA1 - (1-h2)*mB0 - h2*mB1 
-    ranks <- rank(rtall.m, ties.method="average")
+micTest <- function(HH, HL, LH, LL, ART=TRUE) {
+    statistic <- (mean(HL) - mean(HH))  - (mean(LL) - mean(LH))
+    if (ART) {
+        rtall <- c(HH, HL, LH, LL)
+        n1 <- length(HH)
+        n2 <- length(HL)
+        n3 <- length(LH)
+        n4 <- length(LL)
+        h1 <- c(rep(1, n1+n2), rep(0,n3+n4))
+        h2 <- c(rep(1, n1), rep(0, n2), rep(1,n3), rep(0, n4))
+        
+        mA0 <- sum( rtall * (1-h1) ) / sum(1-h1)
+        mA1 <- sum( rtall * h1 ) / sum(h1)
+        mB0 <- sum( rtall * (1-h2) ) / sum(1-h2)
+        mB1 <- sum( rtall * h2 ) / sum(h2)
+        rtall.m <- rtall - (1-h1)*mA0- h1*mA1 - (1-h2)*mB0 - h2*mB1 
+        ranks <- rank(rtall.m, ties.method="average")
 
-    rval <- anova(lm(ranks ~ h1*h2))[3,4:5]
-    return (rval)
+        #rval <- anova(lm(ranks ~ h1*h2))[3,4:5]
+        rval <- summary(lm(ranks~h1*h2))[[4]][4,4]
+        return (list(statistic=statistic, p.val=rval))
+    }
+
+    else {
+        op <- options(contrasts=c("contr.helmert", "contr.poly"))
+
+        h1vec <- c(rep(1, length(HH)), rep(1, length(HL)), 
+                   rep(0, length(LH)), rep(0, length(LL)))
+        h2vec <- c(rep(1, length(HH)), rep(0, length(HL)), 
+                   rep(1, length(LH)), rep(0, length(LL)))
+        allrt <- c(HH, HL, LH, LL)
+        rval <- summary(lm(allrt ~h1vec * h2vec))[[4]][4,4]
+        options(op)
+        return(list(statistic=statistic, p.val=rval))
+    }
 }
-
-
-

@@ -28,7 +28,7 @@ For the SIC function to distinguish among the processing types, the salience man
 This function also performs a statistical analysis to determine whether the positive and negative parts of the SIC are significantly different from zero. Currently the only statistical test is based on the generalization of the two-sample Kolmogorov-Smirnov test described in Houpt & Townsend, 2010.  This test performs two separate null-hypothesis tests:  One test for whether the largest positive value of the SIC is significantly different from zero and one test for whether the largest negative value is significantly different from zero.
 }
 \value{
- \item{SIC}{An object of class stepfun representing the SIC}
+ \item{SIC}{An object of class stepfun representing the SIC.}
  \item{Dominance}{A logical indicating whether the SIC passed the tests of stochastic dominance implied by selective influence.}
  \item{Dvals}{A Matrix containing the values of the test statistic and the associated p-values.}
  \item{MIC}{Results of an adjusted rank transform test of the mean interaction contrast.}
@@ -45,7 +45,7 @@ Joe Houpt <jhoupt@indiana.edu>
 \seealso{
 \code{\link{stepfun}}
 \code{\link{sicGroup}}
-\code{\link{ARTmic}}
+\code{\link{micTest}}
 }
 \examples{
 T1.h <- rexp(50, .2)

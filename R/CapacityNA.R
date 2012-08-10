@@ -152,14 +152,25 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
 
     if(plotCt) {
       dev.new()
-      matplot(times, t(capORMat[Zcond==cond,]), type='l', lty=1,
-        main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
-      if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
+      if(sum(Zcond==cond) > 1) {
+        matplot(times, t(capORMat[Zcond==cond,]), type='l', lty=1,
+          main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+        if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
 
-      dev.new()
-      matplot(times, t(capANDMat[Zcond==cond,]), type='l', lty=1,
-        main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
-      if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
+        dev.new()
+        matplot(times, t(capANDMat[Zcond==cond,]), type='l', lty=1,
+          main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+        if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
+      } else {
+        plot(times, capORMat[Zcond==cond,], type='l', lty=1,
+          main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+        if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
+
+        dev.new()
+        plot(times, capANDMat[Zcond==cond,], type='l', lty=1,
+          main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+      }
+
     }
   }
 

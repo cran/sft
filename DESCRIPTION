@@ -1,6 +1,6 @@
 Package: sft
-Version: 0.0-4
-Date: 2011-12-6
+Version: 0.0-5
+Date: 2012-08-10
 Title: Functions for Systems Factorial Technology Analysis of Data
 Author: Joe Houpt <jhoupt@indiana.edu>, Leslie Blaha
         <Leslie.Blaha@wpafb.af.mil>
@@ -12,6 +12,6 @@ Description: This package contains a series of tools for analyzing
         functions and survivor interaction contrast functions.
 License: GPL (>= 2)
 iURL: http://r-project.org, http://mypage.iu.edu/~jhoupt/SFT
-Packaged: 2012-04-17 17:10:56 UTC; joe
+Packaged: 2012-08-10 14:28:57 UTC; joe
 Repository: CRAN
-Date/Publication: 2012-04-17 18:21:05
+Date/Publication: 2012-08-10 15:11:12

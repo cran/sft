@@ -1,84 +1,67 @@
-ucipTest <- function(RT, CR, OR=TRUE) {
-    ncond <- length(RT) 
-    allRT <- c(RT, recursive=TRUE)
-    Nt <- length(allRT)
-    if (OR) { 
-        Yarr <- rep(0, Nt)
-        Y <- vector("list", ncond) 
-    } else { 
-        Garr <- rep(0, Nt)
-        G <- vector("list", ncond) 
-    }
+ucipTest <- function(RT, CR, OR=TRUE)  {
+  ncond <- length(RT) 
+  allRT <- c(RT, recursive=TRUE)
+  allCR <- c(CR, recursive=TRUE)
+  Nt <- length(allRT)
+
+  index <- numeric()
+  for ( i in 1:ncond ) {
+    index <- c(index, rep(i, length(RT[[i]])) )
+  }
+
+  RTmat <- cbind( allRT, allCR, index)
+
+  RT.sort <- sort(RTmat[,1], index.return=TRUE)
+  cr.s <- RTmat[RT.sort$ix,2]
+  cond.s <- RTmat[RT.sort$ix,3]
+  tvec <- RT.sort$x
+  
+  if (OR) {
+    # Y is the number of response times that have not yet occurred
+    Yarr <- rep(0, Nt)
+    Ymat <- matrix(0, ncond, Nt)
     
-    S <- vector("list", ncond)
-
-    #  Eliminate ties
-    if (length(unique(allRT)) < Nt) {
-        for ( i in 1:length(RT) ) {
-            RT[[i]] <- RT[[i]] + rnorm(length(RT[[i]]), sd=1E-8)
-        }
-        allRT <- c(RT, recursive=TRUE)
-    }
-    tvec <- sort(allRT)
-    
-    for (j in 1:ncond ) { 
-        RTx <- sort(RT[[j]],index.return=TRUE)
-        RT[[j]] <- RTx$x
-        CR[[j]] <- as.logical(CR[[j]])[RTx$ix]
-
-        if (OR) {
-            for (i in 1:Nt ) {Yarr[i] <- sum(RT[[j]] >= tvec[i]) }
-            Y[[j]] <- stepfun(tvec, c(0,Yarr) )
-        } else {
-            for (i in 1:Nt ) {Garr[i] <- sum(RT[[j]] <= tvec[i]) }
-            G[[j]] <- stepfun(tvec, c(Garr,0), right=TRUE )
-        }
+    for (j in 1:ncond) { 
+      # Set the values of Y to represent the number of RTs that have not 
+      #   occurred by time t for condition i
+      for (i in 1:Nt ) {Ymat[j,i] <- sum(RTmat[index==j,1] >= tvec[i]) }
     }
 
-    if (OR) {
-        Yst <- rep(0, Nt) 
-        for ( i in 2:length(Y) ) {
-            Yst <- Yst + Y[[i]](tvec)
-        }
-        W <- Y[[1]](tvec)*(Yst) / (Y[[1]](tvec)+Yst)
-        W[is.nan(W)] <- 0
-        W <- stepfun(tvec, c(0,W))
+    # Create a weighting function based on the uncertainty for the estimator
+    Wv <- Ymat[1,]*( apply(Ymat[2:ncond,], 2, sum)) / apply(Ymat, 2, sum)
 
-
-        numer <- sum( W(RT[[1]][ CR[[1]] ]) / Y[[1]](RT[[1]][ CR[[1]] ]),na.rm=TRUE)
-        for ( i in 2:ncond) {
-           numer<-numer-sum(W(RT[[i]][CR[[i]]])/Y[[i]](RT[[i]][CR[[i]]]),na.rm=TRUE) 
-        }
-        
-        denom <- 0
-        for ( i in 1:ncond ) {
-            denom <- denom + sum((W(RT[[i]][CR[[i]]])/Y[[i]](RT[[i]][CR[[i]]]))^2,na.rm=TRUE)
-        }
-        denom <- sqrt(denom)
-
-
-    } else {
-        Gst <- rep(0, Nt) 
-        for ( i in 2:length(G) ) {
-            Gst <- Gst + G[[i]](tvec)
-        }
-        W <- G[[1]](tvec)*(Gst) / (G[[1]](tvec)+Gst)
-        W <- stepfun(tvec, c(W,0), right=TRUE)
-
-        numer <- sum( W(RT[[1]][ CR[[1]] ]) / G[[1]](RT[[1]][ CR[[1]] ]),na.rm=TRUE)
-
-        for ( i in 2:ncond) {
-           numer<-numer-sum(W(RT[[i]][CR[[i]]])/G[[i]](RT[[i]][CR[[i]]]),na.rm=TRUE) 
-        }
-
-        
-        denom <- 0
-        for ( i in 1:ncond ) {
-            denom <- denom + sum((W(RT[[i]][CR[[i]]])/G[[i]](RT[[i]][CR[[i]]]))^2,na.rm=TRUE)
-        }
-        denom <- sqrt(denom)
+    # Calculate the numerator ( the difference of the weighted true AV performance
+    #   and the weighted predicted UCIP performance
+    numer <- sum(Wv[cond.s==1&cr.s==1]/Ymat[1,cond.s==1&cr.s==1])
+    for (i in 2:ncond) {
+      numer <- numer - sum(Wv[cond.s==i&cr.s==1]/Ymat[i,cond.s==i&cr.s==1])
     }
 
-    if (!OR) numer <- -1*numer
-    return(list(statistic=numer/denom, p.val=c(pnorm(numer/denom),1-pnorm(numer/denom))))
+    # Calculate the denominator (the sum of the estimated variance for each 
+    #  cumulative hazard function estimator
+    denom <- 0
+    for (i in 1:ncond) {
+      denom <- denom + sum((Wv[cond.s==i&cr.s==1]/Ymat[i,cond.s==i&cr.s==1])^2)
+    }
+    denom <- sqrt(denom)
+          
+  } else {
+    Garr <- rep(0, Nt)
+    Gmat <- matrix(0, ncond, Nt)
+    for (j in 1:ncond) { 
+      for (i in 1:Nt ) {Gmat[j,i] <- sum(RTmat[RTmat[,3]==j,1] <= tvec[i]) }
+    }
+    Wv <- Gmat[1,]*( apply(Gmat[2:ncond,], 2, sum)) / apply(Gmat, 2, sum)
+    numer <- -1 * sum(Wv[cond.s==1&cr.s==1]/Gmat[1,cond.s==1&cr.s==1])
+    for (i in 2:ncond) {
+      numer <- numer + sum(Wv[cond.s==i&cr.s==1]/Gmat[i,cond.s==i&cr.s==1])
+    }
+    denom <- 0
+    for (i in 1:ncond) {
+      denom <- denom + sum((Wv[cond.s==i&cr.s==1]/Gmat[i,cond.s==i&cr.s==1])^2)
+    }
+    denom <- sqrt(denom)
+  }
+
+  return(list(statistic=numer/denom, p.val=c(pnorm(numer/denom),1-pnorm(numer/denom))))
 }
