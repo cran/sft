@@ -29,9 +29,9 @@ Then for each response time from the fast--fast condition, \eqn{m_{H, \cdot}} an
 \value{
 A list of class "htest" containing:
  \item{statistic}{The value of the MIC.}
- \item{p.value}{The p-value of the ART or ANOVA test.}
+ \item{p.value}{The \eqn{p}-value of the ART or ANOVA test.}
  \item{alternative}{A description of the alternative hypothesis.}
- \item{method}{A string indicating whether the ART or ANOVA was used.}
+ \item{method}{A string indicating that the Houpt-Townsend statistic was used.}
  \item{data.name}{A string indicating which data were used for which input.}
 }
 \references{

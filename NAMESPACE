@@ -3,7 +3,7 @@
 
 # Export all names
 #exportPattern(".")
-export(mic.test, sic.test, capacity.and, capacity.or, capacityGroup, estimateNAH, estimateNAK, estimateUCIPor, estimateUCIPand, sic, sicGroup,ucipTest, siDominance)
+export(mic.test, sic.test, capacity.and, capacity.or, capacityGroup, estimateNAH, estimateNAK, estimateUCIPor, estimateUCIPand, sic, sicGroup,ucip.test, siDominance)
 
 # Import all packages listed as Imports or Depends
 import(

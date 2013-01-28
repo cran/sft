@@ -8,12 +8,22 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
   channels <- grep("Channel", names(inData), value=T)
   nchannels <- length(channels)
 
-  times <- sort(unique(round(inData$RT)))
+  if (mean(inData$RT) > 100) { 
+    times <- sort(unique(round(inData$RT)))
+  } else{
+    times <- sort(unique(inData$RT))
+  }
 
-  Zor <- numeric()
-  Zand <- numeric()
-  Zsubj <- character()
-  Zcond <- character()
+  caporlist <- vector("list")
+  capandlist <- vector("list")
+  capormodel <- character()
+  capandmodel <- character()
+
+
+  subj.out <- character()
+  cond.out <- character()
+  subj.out.g <- character()
+  cond.out.g <- character()
   capORMat <- numeric()
   capANDMat <- numeric()
   if(!ratio) {
@@ -31,14 +41,22 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
   CRlist <- vector("list", nchannels)
 
   for ( cn in 1:nconditions ) {
+    Zor <- numeric()
+    Zand <- numeric()
     m <- 0
     if (is.factor(conditions)) {cond <- levels(conditions)[cn]} else {cond <- conditions[cn] }
     #cond <- conditions[cn]
-    condsubjects <- with(inData, sort(unique(Subject[Condition==cond])))
+    condsubjects <- factor(with(inData, sort(unique(Subject[Condition==cond]))))
     ncondsubjects <- length(condsubjects)
     for ( sn in 1:ncondsubjects ) {
       if (is.factor(condsubjects)) {subj <- levels(condsubjects)[sn]} else {subj <- condsubjects[sn] }
       #subj <- condsubjects[sn]
+      subj.out <- c(subj.out, subj)
+      cond.out <- c(cond.out, cond)
+
+      subj.out.g <- c(subj.out.g, subj)
+      cond.out.g <- c(cond.out.g, cond)
+
       if ( sn %% 9 == 1 ) {
         m <- m+1
         if(plotCt) {
@@ -76,22 +94,41 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
       }
 
       if( good1 ) {
-        Zsubj <- c(Zsubj, subj)
-        Zcond <- c(Zcond, cond)
-
-        cap1or  <- capacity.or(RT=RTlist, CR=CRlist, ratio=ratio)
-        capORMat <- rbind(capORMat, cap1or$Ct(times))
-        if(!ratio) {
-          varORMat <- rbind(varORMat, cap1or$Var(times))
+        n <- length(subj.out)
+        caporlist[[n]] <- capacity.or(RT=RTlist, CR=CRlist, ratio=ratio)
+        Zor <- c(Zor, caporlist[[n]]$Ctest$statistic)
+        if(caporlist[[n]]$Ctest$p.value < .05) {
+          if(caporlist[[n]]$Ctest$statistic < 0) {
+            capormodel <- c(capormodel, "Limited")
+          } else {
+            capormodel <- c(capormodel, "Super")
+          }
+        } else {
+          capormodel <- c(capormodel, "Nonsignificant")
         }
-        Zor <- c(Zor,cap1or$statistic)
 
-        cap1and <- capacity.and(RT=RTlist, CR=CRlist, ratio=ratio)
-        capANDMat <- rbind(capANDMat, cap1and$Ct(times))
+        capORMat <- rbind(capORMat, caporlist[[n]]$Ct(times))
         if(!ratio) {
-          varANDMat <- rbind(varANDMat, cap1and$Var(times))
+          varORMat <- rbind(varORMat, caporlist[[n]]$Var(times))
         }
-        Zand <- c(Zand,cap1and$statistic)
+
+
+        capandlist[[n]] <- capacity.and(RT=RTlist, CR=CRlist, ratio=ratio)
+        Zand <- c(Zand,capandlist[[n]]$Ctest$statistic)
+        if(capandlist[[n]]$Ctest$p.value < .05) {
+          if(capandlist[[n]]$Ctest$statistic < 0) {
+            capandmodel <- c(capandmodel, "Limited")
+          } else {
+            capandmodel <- c(capandmodel, "Super")
+          }
+        } else {
+          capandmodel <- c(capandmodel, "Nonsignificant")
+        }
+
+        capANDMat <- rbind(capANDMat, capandlist[[n]]$Ct(times))
+        if(!ratio) {
+          varANDMat <- rbind(varANDMat, capandlist[[n]]$Var(times))
+        }
 
         if(plotCt) {
           dev.set(devmatOR[cn,m])
@@ -119,20 +156,17 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
         }
 
       } else {
-        Zsubj <- c(Zsubj, subj)
-        Zcond <- c(Zcond, cond)
 
+        capormodel <- c(capormodel, NA)
         capORMat <- rbind(capORMat, rep(NA, length(times)) )
         if(!ratio){
           varORMat <- rbind(varORMat, rep(NA, length(times)) )
         }
-        Zor <- c(Zor,NA)
-
+        capandmodel <- c(capandmodel, NA)
         capANDMat <- rbind(capANDMat, rep(NA, length(times)) )
         if(!ratio){
           varANDMat <- rbind(varANDMat, rep(NA, length(times)) )
         }
-        Zand <- c(Zand,NA)
 
         if(plotCt) {
           dev.set(devmatOR[cn,m])
@@ -152,36 +186,68 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
 
     if(plotCt) {
       dev.new()
-      if(sum(Zcond==cond) > 1) {
-        matplot(times, t(capORMat[Zcond==cond,]), type='l', lty=1,
+      if(sum(cond.out==cond) > 1) {
+        matplot(times, t(capORMat[cond.out==cond,]), type='l', lty=1,
           main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
         if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
 
         dev.new()
-        matplot(times, t(capANDMat[Zcond==cond,]), type='l', lty=1,
+        matplot(times, t(capANDMat[cond.out==cond,]), type='l', lty=1,
           main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
         if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
       } else {
-        plot(times, capORMat[Zcond==cond,], type='l', lty=1,
+        plot(times, capORMat[cond.out==cond,], type='l', lty=1,
           main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
         if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
 
         dev.new()
-        plot(times, capANDMat[Zcond==cond,], type='l', lty=1,
+        plot(times, capANDMat[cond.out==cond,], type='l', lty=1,
           main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
       }
 
     }
+
+    subj.out.g <- c(subj.out.g, "Group")
+    cond.out.g <- c(cond.out.g, cond)
+    mZor <- mean(Zor, na.rm=TRUE)
+    nZor <- sum(!is.na(Zor))
+    pZor <- pnorm(mZor * sqrt(nZor))
+    if( (pZor < .025) | (pZor > .975) )  {
+      if(mZor < 0) {
+        capormodel <- c(capormodel, "Limited")
+      } else {
+        capormodel <- c(capormodel, "Super")
+      }
+    } else {
+      capormodel <- c(capormodel, "Nonsignificant")
+    }
+
+    mZand <- mean(Zand, na.rm=TRUE)
+    nZand <- sum(!is.na(Zand))
+    pZand <- pnorm(mZand * sqrt(nZand))
+    if( (pZand < .025) | (pZand > .975) ) {
+      if(mZand < 0) {
+        capandmodel <- c(capandmodel, "Limited")
+      } else {
+        capandmodel <- c(capandmodel, "Super")
+      }
+    } else {
+      capandmodel <- c(capandmodel, "Nonsignificant")
+    }
   }
 
-  Z <- as.data.frame(list(Subject=Zsubj, Condition=Zcond, 
-          Z.or=Zor, p.lower=pnorm(Zor), p.upper=1-pnorm(Zor),
-          Z.and=Zand, p.lower=pnorm(Zand), p.upper=1-pnorm(Zand)))
+  overview <- as.data.frame(list(Subject=subj.out.g, Condition=cond.out.g,
+      Ct.or=capormodel, Ct.and=capandmodel))
+
   if(ratio){
-    return(list(statistic=Z, Ct.or=capORMat, Ct.and=capANDMat, times=times))
+    #return(list(statistic=Z, Ct.or=capORMat, Ct.and=capANDMat, times=times))
+    return(list(overview=overview, Ct.or.fn=capORMat, Ct.and.fn=capANDMat, capacity.or=caporlist, capacity.and=capandlist, times=times))
   } else {
-    return(list(statistic=Z, Ct.or=capORMat, Var.or=varORMat, Ct.and=capANDMat, Var.and=varANDMat, times=times))
+    return(list(overview=overview, Ct.or.fn=capORMat, Ct.and.fn=capANDMat, Ct.or.var=varORMat, Ct.and.var=varANDMat, capacity.or=caporlist, capacity.and=capandlist, times=times))
+    #return(list(statistic=Z, Ct.or=capORMat, Var.or=varORMat, Ct.and=capANDMat, Var.and=varANDMat, times=times))
   }
+
+
 }
 
 
@@ -199,7 +265,7 @@ capacity.or <- function(RT, CR=NULL, ratio=TRUE) {
     numer <- estimateNAH(RT=RT[[1]], CR=CR[[1]])
     denom <- estimateUCIPor(RT=RT[1+(1:ncond)], CR=CR[1+(1:ncond)])
 
-    rmtest <- ucipTest(RT, CR, OR=TRUE)
+    rmtest <- ucip.test(RT, CR, OR=TRUE)
 
     if (ratio) {
       C.or <- numer$H(times) / denom$H(times)
@@ -207,13 +273,13 @@ capacity.or <- function(RT, CR=NULL, ratio=TRUE) {
       C.or[is.nan(C.or)] <- NA
       C.or[is.infinite(C.or)] <- NA
       C.or <- approxfun(times, C.or)
-      return( list(Ct=C.or, statistic=rmtest$statistic, p.val=rmtest$p.val) )
+      return( list(Ct=C.or, Ctest=rmtest) )
     } else {
       C.or <- numer$H(times) - denom$H(times)
       C.or <- approxfun(c(0,times), c(0,C.or))
       Var.or <- numer$Var(times) + denom$Var(times)
       Var.or <- approxfun(c(0,times), c(0,Var.or))
-      return( list(Ct=C.or, Var=Var.or, statistic=rmtest$statistic, p.val=rmtest$p.val) )
+      return( list(Ct=C.or, Var=Var.or, Ctest=rmtest, p.val=rmtest$p.val) )
     }
 }
 
@@ -229,7 +295,7 @@ capacity.and <- function(RT, CR=NULL, ratio=TRUE) {
 
     ncond <- length(RT) - 1 
 
-    rmtest <- ucipTest(RT, CR, OR=FALSE)
+    rmtest <- ucip.test(RT, CR, OR=FALSE)
 
     # Find Nelson-Aalen Reverse Cumulative Hazard Estimates
     denom <- estimateNAK(RT[[1]], CR[[1]])
@@ -241,12 +307,12 @@ capacity.and <- function(RT, CR=NULL, ratio=TRUE) {
       C.and[is.nan(C.and)] <- NA
       C.and[is.infinite(C.and)] <- NA
       C.and <- approxfun(times, C.and)
-      return( list(Ct=C.and, statistic=rmtest$statistic, p.val=rmtest$p.val) )
+      return( list(Ct=C.and, Ctest=rmtest) )
     } else {
       C.and <- denom$K(times) - numer$K(times) 
       C.and <- approxfun(c(times,Inf), c(C.and,0))
       Var.and <- numer$Var(times) + denom$Var(times)
       Var.and <- approxfun(c(times,Inf), c(Var.and,0))
-      return( list(Ct=C.and, Var=Var.and, statistic=rmtest$statistic, p.val=rmtest$p.val) )
+      return( list(Ct=C.and, Var=Var.and, Ctest=rmtest) )
     }
 }

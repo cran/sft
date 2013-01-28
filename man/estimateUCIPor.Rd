@@ -21,7 +21,7 @@ For example, in a two channel UCIP system the probability that no process has fi
 \deqn{P(T_{ab} > t) = P(T_a > t)P(T_b > t)}{% 
       P(Tab > t) > P(Ta > t)P(Tb > t)}
 
-We are interested in the cumulative hazard function, which is the natural log of the suvivor function (which is 1-CDF).  Because the log of a product is the sum of the logs, this gives us the following equality for the two channel OR process.
+We are interested in the cumulative hazard function, which is the natural log of the suvivor function (which is one minus the cumulative distribution function).  Because the log of a product is the sum of the logs, this gives us the following equality for the two channel OR process.
 \deqn{H_{ab}(t) = H_a(t) + H_b(t)}{% 
       Hab(t) = Ha(t) + Hb(t)}
 
@@ -29,7 +29,7 @@ In general, the cumulative hazard function of a UCIP OR process is estimated by 
 \deqn{H_{\rm UCIP}(t) = \sum_{i=1}^n H_i(t)}{% 
       Hucip(t) = sum( i = 1 .. n) Hi(t)}
 
-The cumulative hazard functions of the sub-processes are estimated using the Nelson-Aalen estimator.  The Nelson-Aalen estimator is a Gaussian martingale with respect to XXX, so the estimate of the UCIP performance is also a Gaussian martingale and the variance of the estimator can be estimated with the sum of variance estimates for each sub-process.
+The cumulative hazard functions of the sub-processes are estimated using the Nelson-Aalen estimator.  The Nelson-Aalen estimator is a Gaussian martingale, so the estimate of the UCIP performance is also a Gaussian martingale and the variance of the estimator can be estimated with the sum of variance estimates for each sub-process.
 }
 \value{
   \item{H }{A function of class "stepfun" that returns the Nelson-Aalen estimator of the cumulative hazard function of a UCIP model on a first-terminating (OR) task.}

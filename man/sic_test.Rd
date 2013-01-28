@@ -23,8 +23,8 @@ sic.test(HH, HL, LH, LL, method="ks")
 This function performs a statistical analysis to determine whether the positive and negative parts of the SIC are significantly different from zero. Currently the only statistical test is based on the generalization of the two-sample Kolmogorov-Smirnov test described in Houpt & Townsend, 2010.  This test performs two separate null-hypothesis tests:  One test for whether the largest positive value of the SIC is significantly different from zero and one test for whether the largest negative value is significantly different from zero.
 }
 \value{
- \item{positive}{A list of class "htest" containing the statistic and p-value along with descriptions of the alternative hypothesis, method and data names for the test of a significant positive portion of the SIC.}
- \item{negative}{A list of class "htest" containing the statistic and p-value along with descriptions of the alternative hypothesis, method and data names for the test of a significant negative portion of the SIC.}
+ \item{positive}{A list of class "htest" containing the statistic and \eqn{p}-value along with descriptions of the alternative hypothesis, method and data names for the test of a significant positive portion of the SIC.}
+ \item{negative}{A list of class "htest" containing the statistic and \eqn{p}-value along with descriptions of the alternative hypothesis, method and data names for the test of a significant negative portion of the SIC.}
 }
 \references{
 Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary perception: An investigation of parallel, serial and coactive theories. \emph{Journal of Mathematical Psychology, 39}, 321-360.

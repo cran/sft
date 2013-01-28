@@ -1,5 +1,5 @@
 Package: sft
-Version: 0.1-0
+Version: 0.2-1
 Date: 2013-01-28
 Title: Functions for Systems Factorial Technology Analysis of Data
 Author: Joe Houpt <joseph.houpt@wright.edu>, Leslie Blaha
@@ -11,6 +11,7 @@ Description: This package contains a series of tools for analyzing
         plotting and statistically testing capacity coefficient
         functions and survivor interaction contrast functions.
 License: GPL (>= 2)
-Packaged: 2013-02-01 16:50:18 UTC; jhoupt
+Packaged: 2013-05-27 18:46:50 UTC; jhoupt
+NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-02-01 18:26:30
+Date/Publication: 2013-05-27 22:41:27

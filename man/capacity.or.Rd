@@ -29,8 +29,7 @@ The difference form of the capacity coefficient is given by,
 \value{
   \item{Ct}{An object of class approxfun representing the OR capacity coefficient.}
   \item{Var}{An object of class approxfun representing the variance of the estimated AND capacity coefficient.  Only returned if ratio=FALSE.}
-  \item{statistic}{Z-score of a null-hypothesis test for UCIP performance.}
-  \item{p.val}{p-value of a null-hypothesis test for UCIP performance.}
+  \item{Ctest}{A list with class "htest" that is returned from \code{\link{ucip.test}} and contains the statistic and p-value.}
 }
 \references{
 Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary perception: An investigation of parallel, serial and coactive theories. \emph{Journal of Mathematical Psychology, 39}, 321-360.
@@ -41,6 +40,7 @@ Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity 
 Joe Houpt <joseph.houpt@wright.edu>
 }
 \seealso{
+\code{\link{ucip.test}}
 \code{\link{capacityGroup}}
 \code{\link{capacity.and}}
 \code{\link{estimateUCIPor}}
@@ -58,10 +58,13 @@ RT.pp.super <- pmin( rexp(100, 2*rate1), rexp(100, 2*rate2))
 tvec <- sort(unique(c(RT.pa, RT.ap, RT.pp.limited, RT.pp.unlimited, RT.pp.super)))
 
 cap.limited <- capacity.or(RT=list(RT.pp.limited, RT.pa, RT.ap))
+print(cap.limited$Ctest)
 cap.unlimited <- capacity.or(RT=list(RT.pp.unlimited, RT.pa, RT.ap))
 cap.super <- capacity.or(list(RT=RT.pp.super, RT.pa, RT.ap))
 
-matplot(tvec, cbind(cap.limited$Ct(tvec), cap.unlimited$Ct(tvec), cap.super$Ct(tvec)),type='l',lty=1,ylim=c(0,3), col=2:4, main="Example Capacity Functions", xlab="Time", ylab="C(t)")
+matplot(tvec, cbind(cap.limited$Ct(tvec), cap.unlimited$Ct(tvec), cap.super$Ct(tvec)),
+  type='l', lty=1, ylim=c(0,3), col=2:4, main="Example Capacity Functions", xlab="Time", 
+  ylab="C(t)")
 abline(1,0)
 legend('topright', c("Limited", "Unlimited", "Super"), lty=1, col=2:4)
 }

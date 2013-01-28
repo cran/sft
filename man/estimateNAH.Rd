@@ -9,7 +9,7 @@ Computes the Nelson-Aalen estimator of a cumulative hazard function.
 estimateNAH(RT, CR)
 }
 \arguments{
-  \item{RT}{A vector of times at which an event occurs, e.g., a vector of response times.}
+  \item{RT}{A vector of times at which an event occurs (e.g., a vector of response times).}
   \item{CR}{A vector of status indicators, 1=normal, 0=censored.  For response time data, this corresponds to 1=correct, 0=incorrect.}
 }
 \details{

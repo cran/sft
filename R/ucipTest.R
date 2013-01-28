@@ -1,9 +1,13 @@
-ucipTest <- function(RT, CR=NULL, OR=TRUE)  {
+ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
+  METHOD <- "Houpt-Townsend UCIP test"
+  DNAME <- deparse(substitute(RT))
+
   ncond <- length(RT) 
   allRT <- c(RT, recursive=TRUE)
   if ( is.null(CR) ) {
     allCR <- rep(1, length(allRT))
   } else {
+    DNAME <- paste(DNAME, "and", deparse(substitute(CR)))
     allCR <- c(CR, recursive=TRUE)
   }
   Nt <- length(allRT)
@@ -21,6 +25,8 @@ ucipTest <- function(RT, CR=NULL, OR=TRUE)  {
   tvec <- RT.sort$x
   
   if (OR) {
+    ALTERNATIVE <- "response times are different than those predicted by the UCIP-OR model"
+
     # Y is the number of response times that have not yet occurred
     Yarr <- rep(0, Nt)
     Ymat <- matrix(0, ncond, Nt)
@@ -50,6 +56,7 @@ ucipTest <- function(RT, CR=NULL, OR=TRUE)  {
     denom <- sqrt(denom)
           
   } else {
+    ALTERNATIVE <- "response times are different than those predicted by the UCIP-AND model"
     Garr <- rep(0, Nt)
     Gmat <- matrix(0, ncond, Nt)
     for (j in 1:ncond) { 
@@ -66,6 +73,12 @@ ucipTest <- function(RT, CR=NULL, OR=TRUE)  {
     }
     denom <- sqrt(denom)
   }
+  STATISTIC <- numer/denom
+  names(STATISTIC) = "z"
 
-  return(list(statistic=numer/denom, p.val=c(pnorm(numer/denom),1-pnorm(numer/denom))))
+  pval <- 2*min(pnorm(numer/denom),1-pnorm(numer/denom))
+  rval <- list(statistic=STATISTIC, p.value=pval, alternative=ALTERNATIVE,
+            method=METHOD, data.name=DNAME)
+  class(rval) <- "htest"
+  return(rval)
 }

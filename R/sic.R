@@ -6,12 +6,11 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
   conditions <- sort(unique(inData$Condition))
   nconditions <- length(conditions)
 
-  SICnames <- c("SerialOR", "ParallelAND", "ParallelOR", "Coactive",
-                "ParallelAND", "SerialAND")
+  SICnames <- c("ParallelOR", "ParallelAND", "SerialOR", "SerialAND", "Coactive")
 
   times <- sort(unique(round(inData$RT)))
 
-  sic <- vector("list")
+  sicList <- vector("list")
 
   subj.out <- character()
   cond.out <- character()
@@ -20,6 +19,8 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
   negative <- character()
   mic <- character()
   modelresult <- character()
+  predicted <- character()
+  rejected <- character()
 
   allSICfn <- numeric()
 
@@ -53,45 +54,54 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
         subj.out <- c(subj.out, subj)
         n <- n+1
   
-        sic[[n]] <- sic(HH=HH, HL=HL, LH=LH, LL=LL)
-        allSICfn <- rbind(allSICfn, sic[[n]]$SIC(times))
+        sicList[[n]] <- sic(HH=HH, HL=HL, LH=LH, LL=LL)
+        allSICfn <- rbind(allSICfn, sicList[[n]]$SIC(times))
 
 
-        if( all(sic[[n]]$Dominance$p.value[1:4] < .05) & !any(sic[[n]]$Dominance$p.value[5:8] < .05) ) {
+        if( all(sicList[[n]]$Dominance$p.value[1:4] < .05) & !any(sicList[[n]]$Dominance$p.value[5:8] < .05) ) {
           siresult <- c(siresult, "Pass")
-        } else if ( any(sic[[n]]$Dominance$p.value[5:8] < .05) ) {
+        } else if ( any(sicList[[n]]$Dominance$p.value[5:8] < .05) ) {
           siresult <- c(siresult, "Fail")
         } else {
           siresult <- c(siresult, "Ambiguous")
         }
 
-        if (sic[[n]]$Dvals$positive$p.value < .05) {
-          positive <- c(positive, TRUE)
-          if (sic[[n]]$Dvals$negative$p.value < .05) {
-            negative <- c(negative, TRUE)
-            if (sic[[n]]$MIC$p.value < .05) {
-              modelresult <- c(modelresult, "Coactive")
-            } else {
-              modelresult <- c(modelresult, "SerialAND")
-            }
-          } else {
-            negative <- c(negative, FALSE)
-            modelresult <- c(modelresult, "ParallelOR")
-          }
-        } else {
-          positive <- c(positive, FALSE)
-          if (sic[[n]]$Dvals$negative$p.value < .05) {
-            negative <- c(negative, TRUE)
-            modelresult <- c(modelresult, "ParallelAND")
-          } else {
-            negative <- c(negative, FALSE)
-            modelresult <- c(modelresult, "SerialOR")
-          }
-        }
-        mic <- c(mic, sic[[n]]$MIC$p.value < .05)
+        rejected.models  <- rep(FALSE,5)
 
+        if (sicList[[n]]$SICtest$positive$p.value < .05) {
+          rejected.models[c(2,3)] <- TRUE  # ParallelAND, SerialOR
+          positive <- c(positive, "Significant")
+        } else {positive <- c(positive, "Nonsignificant")}
+
+        if (sicList[[n]]$SICtest$negative$p.value < .05) {
+          rejected.models[c(1,3)] <- TRUE # ParallelOR, SerialOR
+          negative <- c(negative, "Significant")
+        } else {negative <- c(negative, "Nonsignificant")}
+
+        if (sicList[[n]]$MIC$p.value < .05) {
+          rejected.models[c(3,4)] <- TRUE # SerialOR, SerialAND
+          if (sicList[[n]]$MIC$statistic > 0) {
+            mic <- c(mic, "Positive")
+          } else { mic <- c(mic, "Negative") }
+        } else {mic <- "Nonsignificant"}
+
+        if( sum(rejected.models)==0) {
+          predicted <- c(predicted, SICnames[3]) # Serial OR
+        } else if( sum(rejected.models)==1) {
+          predicted <- c(predicted, SICnames[5]) # Coactive
+        } else if( all(rejected.models[1:3] == c(0,1,1) ) ) {
+          predicted <- c(predicted, SICnames[1]) # Parallel-OR
+        } else if( all(rejected.models[1:3] == c(1,0,1) ) ){
+          predicted <- c(predicted, SICnames[2]) # Parallel-AND
+        } else if( all(rejected.models[1:4] == c(1,1,1,0) ) ) {
+          predicted <- c(predicted, SICnames[4]) # Serial-AND
+        } else {
+          predicted <- c(predicted, "NA")
+        }
+
+        rejected <- c(rejected, paste(SICnames[rejected.models],collapse=",") )
         if(plotSIC) {
-          plot(times, sic[[n]]$SIC(times), type='l',
+          plot(times, sicList[[n]]$SIC(times), type='l',
             main=paste(cond, " Condition\nParticipant ", subj, sep=""), 
             xlab="Time",ylab="SIC(t)",...)
         }
@@ -108,8 +118,8 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
 
   overview <- as.data.frame(list(Subject=subj.out, Condition=cond.out,
       Selective.Influence=siresult, Positive.SIC=positive, Negative.SIC=negative, 
-      MIC=mic, Model=modelresult))
-  return(list(overview=overview, SICfn=allSICfn, sic=sic, times=times))
+      MIC=mic, Predicted_by=predicted, Rejected.Models=rejected))
+  return(list(overview=overview, sic.fn=allSICfn, sic=sicList, times=times))
 }
 
 
@@ -132,7 +142,7 @@ sic <- function(HH, HL, LH, LL, domtest="ks", sictest="ks", mictest=c("art", "an
     sicstat <- sic.test(HH, HL, LH, LL, method=sictest)
     micstat <- mic.test(HH, HL, LH, LL, method=mictest)
 
-    return(list(SIC=SIC, Dominance=dominance, Dvals=sicstat, MIC=micstat, N=N))
+    return(list(SIC=SIC, Dominance=dominance, SICtest=sicstat, MICtest=micstat, N=N))
 }
 
 sic.test <- function(HH, HL, LH, LL, method="ks") {

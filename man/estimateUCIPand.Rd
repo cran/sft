@@ -20,7 +20,7 @@ For example, in a two channel UCIP system the probability that both processes ha
 \deqn{P(T_{ab} \le t) = P(T_a \le t)P(T_b \le t)}{% 
       P(Tab <= t) = P(Ta <= t)P(Tb <= t)}
 
-We are interested in the cumulative reverse hazard function, which is the natural log of the CDF.  Because the log of a product is the sum of the logs, this gives us the following equality for the two channel AND process. 
+We are interested in the cumulative reverse hazard function, which is the natural log of the cumulative distribution function.  Because the log of a product is the sum of the logs, this gives us the following equality for the two channel AND process. 
 \deqn{K_{ab}(t) = K_a(t) + K_b(t)}{% 
       Kab(t) = Ka(t) + Kb(t)}
 
@@ -28,7 +28,7 @@ In general, the cumulative reverse hazard function of a UCIP AND process is esti
 \deqn{K_{\rm UCIP}(t) = \sum_{i=1}^n K_i(t)}{% 
       Kucip(t) = sum( i = 1 .. n) Ki(t)}
 
-The cumulative reverse hazard functions of the sub-processes are estimated using the Nelson-Aalen estimator.  The Nelson-Aalen estimator is a Gaussian martingale with respect to XXX, so the estimate of the UCIP performance is also a Gaussian martingale and the variance of the estimator can be estimated with the sum of variance estimates for each sub-process.
+The cumulative reverse hazard functions of the sub-processes are estimated using the Nelson-Aalen estimator.  The Nelson-Aalen estimator is a Gaussian martingale, so the estimate of the UCIP performance is also a Gaussian martingale and the variance of the estimator can be estimated with the sum of variance estimates for each sub-process.
 }
 
 \value{

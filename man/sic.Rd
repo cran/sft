@@ -16,7 +16,7 @@ sic(HH, HL, LH, LL, domtest="ks", sictest="ks", mictest=c("art", "anova"))
   \item{LH}{Response times from the Low--High condition.}
   \item{LL}{Response times from the Low--Low condition.}
   \item{sictest}{Which type of hypothesis test to use for SIC form.}
-  \item{domtest}{Which type of hypothesis test to use for testing stochastic dominance relations, either as series of KS tests (\"ks\") or the dominance test based on Dirichlet process priors (\"dp\"). DP not yet implemented.}
+  \item{domtest}{Which type of hypothesis test to use for testing stochastic dominance relations, either as series of KS tests ("ks") or the dominance test based on Dirichlet process priors ("dp"). DP not yet implemented.}
   \item{mictest}{Which type of hypothesis test to use for the MIC, either adjusted rank transform or ANOVA. }
 }
 \details{
@@ -30,8 +30,8 @@ This function also performs a statistical analysis to determine whether the posi
 }
 \value{
  \item{SIC}{An object of class stepfun representing the SIC.}
- \item{Dominance}{A data frame with the first column indicating which ordering was tested, the second column indicating the test statistic and the third indicating the p-value for that value of the statistic.}
- \item{Dvals}{A Matrix containing the values of the test statistic and the associated p-values.}
+ \item{Dominance}{A data frame with the first column indicating which ordering was tested, the second column indicating the test statistic and the third indicating the \eqn{p}-value for that value of the statistic.}
+ \item{Dvals}{A Matrix containing the values of the test statistic and the associated \eqn{p}-values.}
  \item{MIC}{Results of an adjusted rank transform test of the mean interaction contrast.}
  \item{N}{The scaling factor used for the KS test of the SIC form.}
 }
