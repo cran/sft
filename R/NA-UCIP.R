@@ -38,23 +38,26 @@ estimateNAK <- function(RT, CR=NULL) {
 }
 
 
-estimateUCIPor <- function(RT, CR) {
+estimateUCIPor <- function(RT, CR=NULL) {
     allRT <- sort(c(RT, recursive=TRUE))
-
     ncond <- length(RT)
     nt <- length(allRT)
 
-    Y <- matrix(NA, nt, ncond)
-    Ystepfun <- vector("list", ncond)
-    H <- vector("list", ncond)
-    H.v <- vector("list", ncond)
-
-    for( i in 1:ncond )  {
-        sorted <- sort(RT[[i]], index.return=TRUE)
-        RT[[i]] <- sorted$x
-        CR[[i]] <- CR[[i]][sorted$ix]
-        CR[[i]] <- as.logical(CR[[i]])
+    if ( is.null(CR) | length(CR) != length(RT) ){
+      CR <- vector("list", length(RT))
     }
+
+    #Y <- matrix(NA, nt, ncond)
+    #Ystepfun <- vector("list", ncond)
+    #H <- vector("list", ncond)
+    #H.v <- vector("list", ncond)
+
+    #for( i in 1:ncond )  {
+    #    sorted <- sort(RT[[i]], index.return=TRUE)
+    #    RT[[i]] <- sorted$x
+    #    CR[[i]] <- CR[[i]][sorted$ix]
+    #    CR[[i]] <- as.logical(CR[[i]])
+    #}
 
     Hucip <- rep(0, nt)
     Hucip.v <- rep(0, nt)
@@ -72,23 +75,26 @@ estimateUCIPor <- function(RT, CR) {
 }
 
 
-estimateUCIPand <- function(RT, CR) {
+estimateUCIPand <- function(RT, CR=NULL) {
     allRT <- sort(c(RT, recursive=TRUE))
-
     ncond <- length(RT)
     nt <- length(allRT)
 
-    Y <- matrix(NA, nt, ncond)
-    Ystepfun <- vector("list", ncond)
-    K <- vector("list", ncond)
-    K.v <- vector("list", ncond)
-
-    for( i in 1:ncond )  {
-        sorted <- sort(RT[[i]], index.return=TRUE)
-        RT[[i]] <- sorted$x
-        CR[[i]] <- CR[[i]][sorted$ix]
-        CR[[i]] <- as.logical(CR[[i]])
+    if ( is.null(CR) | length(CR) != length(RT) ) {
+      CR <- vector("list", length(RT))
     }
+
+    #Y <- matrix(NA, nt, ncond)
+    #Ystepfun <- vector("list", ncond)
+    #K <- vector("list", ncond)
+    #K.v <- vector("list", ncond)
+
+    #for( i in 1:ncond )  {
+    #    sorted <- sort(RT[[i]], index.return=TRUE)
+    #    RT[[i]] <- sorted$x
+    #    CR[[i]] <- CR[[i]][sorted$ix]
+    #    CR[[i]] <- as.logical(CR[[i]])
+    #}
 
     Kucip <- rep(0, nt)
     Kucip.v <- rep(0, nt)

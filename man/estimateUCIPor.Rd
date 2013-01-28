@@ -36,12 +36,12 @@ The cumulative hazard functions of the sub-processes are estimated using the Nel
   \item{Var }{A function of class "stepfun" that returns the estimated variance of the Nelson-Aalen estimator of the cumulative reverse hazard function of a UCIP model on a first-terminating (OR) task.}
 }
 \references{
-Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity Analysis.  \emph{Journal of Mathematical Psychology, XX}, XXX-XXX.
-
 Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary perception: An investigation of parallel, serial and coactive theories. \emph{Journal of Mathematical Psychology, 39}, 321-360.
+
+Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity Analysis.  \emph{Journal of Mathematical Psychology, 56}, 341-355.
 }
 \author{
-Joe Houpt <jhoupt@indiana.edu>
+Joe Houpt <joseph.houpt@wright.edu>
 }
 
 \seealso{

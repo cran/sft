@@ -1,19 +1,19 @@
 
 \name{estimateNAH}
 \alias{estimateNAH}
-\title{Neslon-Aalen Esitmator of the Cumulative Hazard Function}
+\title{Neslon-Aalen Estimator of the Cumulative Hazard Function}
 \description{
-Computes the Nelson-Aalen esitmator of a cumulative hazard function.
+Computes the Nelson-Aalen estimator of a cumulative hazard function.
 }
 \usage{
 estimateNAH(RT, CR)
 }
 \arguments{
   \item{RT}{A vector of times at which an event occurs, e.g., a vector of response times.}
-  \item{CR}{A vector of status indicators, 1=normal, 0=censored.  For respsone time data, this corresponds to 1=correct, 0=incorrect.}
+  \item{CR}{A vector of status indicators, 1=normal, 0=censored.  For response time data, this corresponds to 1=correct, 0=incorrect.}
 }
 \details{
-The Nelson-Aalen estimator of the cumulative hazard function is a step function with jumps at each event time.  The jump size is given by the number at risk up until immediately before the event.  If Y(t) is the number at risk immediately before t, then the N-A esitmator is given by:
+The Nelson-Aalen estimator of the cumulative hazard function is a step function with jumps at each event time.  The jump size is given by the number at risk up until immediately before the event.  If Y(t) is the number at risk immediately before t, then the N-A estimator is given by:
 \deqn{H(t) = \sum_{s \in \{{\rm Event Times} < t\}} \frac{1}{Y(s)}}{% 
       H(t) = sum(s in {Event Times < t}) 1/Y(s)}
 
@@ -26,7 +26,7 @@ The Nelson-Aalen estimator of the cumulative hazard function is a step function 
 Aalen, O. O., Borgan, O., & Gjessing, H. K. (2008). \emph{Survival and event history analysis: A process point of view}. New York: Springer.
 }
 \author{
-Joe Houpt <jhoupt@indiana.edu>
+Joe Houpt <joseph.houpt@wright.edu>
 }
 
 \seealso{

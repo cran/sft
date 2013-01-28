@@ -1,7 +1,11 @@
-ucipTest <- function(RT, CR, OR=TRUE)  {
+ucipTest <- function(RT, CR=NULL, OR=TRUE)  {
   ncond <- length(RT) 
   allRT <- c(RT, recursive=TRUE)
-  allCR <- c(CR, recursive=TRUE)
+  if ( is.null(CR) ) {
+    allCR <- rep(1, length(allRT))
+  } else {
+    allCR <- c(CR, recursive=TRUE)
+  }
   Nt <- length(allRT)
 
   index <- numeric()

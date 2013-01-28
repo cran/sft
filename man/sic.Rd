@@ -8,7 +8,7 @@ Function to calculate survivor interaction contrast and associated measures.
 }
     
 \usage{
-sic(HH, HL, LH, LL, sictest="ks", domtest="ks")
+sic(HH, HL, LH, LL, domtest="ks", sictest="ks", mictest=c("art", "anova"))
 }
 \arguments{
   \item{HH}{Response times from the High--High condition.}
@@ -17,6 +17,7 @@ sic(HH, HL, LH, LL, sictest="ks", domtest="ks")
   \item{LL}{Response times from the Low--Low condition.}
   \item{sictest}{Which type of hypothesis test to use for SIC form.}
   \item{domtest}{Which type of hypothesis test to use for testing stochastic dominance relations, either as series of KS tests (\"ks\") or the dominance test based on Dirichlet process priors (\"dp\"). DP not yet implemented.}
+  \item{mictest}{Which type of hypothesis test to use for the MIC, either adjusted rank transform or ANOVA. }
 }
 \details{
      SIC(t) = (S_LL - S_LH) - (S_HL - S_HH)
@@ -29,7 +30,7 @@ This function also performs a statistical analysis to determine whether the posi
 }
 \value{
  \item{SIC}{An object of class stepfun representing the SIC.}
- \item{Dominance}{A logical indicating whether the SIC passed the tests of stochastic dominance implied by selective influence.}
+ \item{Dominance}{A data frame with the first column indicating which ordering was tested, the second column indicating the test statistic and the third indicating the p-value for that value of the statistic.}
  \item{Dvals}{A Matrix containing the values of the test statistic and the associated p-values.}
  \item{MIC}{Results of an adjusted rank transform test of the mean interaction contrast.}
  \item{N}{The scaling factor used for the KS test of the SIC form.}
@@ -40,12 +41,13 @@ Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary per
 Houpt, J.W. & Townsend, J.T. (2010). The statistical properties of the survivor interaction contrast. \emph{Journal of Mathematical Psychology, 54}, 446-453.
 }
 \author{
-Joe Houpt <jhoupt@indiana.edu>
+Joe Houpt <joseph.houpt@wright.edu>
 }
 \seealso{
 \code{\link{stepfun}}
 \code{\link{sicGroup}}
-\code{\link{micTest}}
+\code{\link{mic.test}}
+\code{\link{sic.test}}
 }
 \examples{
 T1.h <- rexp(50, .2)

@@ -23,10 +23,10 @@ The test is based on the Nelson-Aalen formulation of the log-rank test.  The fun
   \item{p.val}{p-value of a null-hypothesis test for UCIP performance.}
 }
 \references{
-Houpt, J.W. & Townsend, J.T. (2010). The statistical properties of the capacity coefficient. \emph{Journal of Mathematical Psychology, XX}, XXX-XXX.
+Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity Analysis.  \emph{Journal of Mathematical Psychology, 56}, 341-355.
 }
 \author{
-Joe Houpt <jhoupt@indiana.edu>
+Joe Houpt <joseph.houpt@wright.edu>
 }
 \seealso{
 \code{\link{capacity.or}}

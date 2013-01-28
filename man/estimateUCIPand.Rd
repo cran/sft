@@ -36,12 +36,12 @@ The cumulative reverse hazard functions of the sub-processes are estimated using
   \item{Var }{A function of class "stepfun" that returns the estimated variance of the Nelson-Aalen estimator of the cumulative reverse hazard function of a UCIP model on an exhaustive (AND) task.}
 }
 \references{
-Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity Analysis.  \emph{Journal of Mathematical Psychology, XX}, XXX-XXX.
-
 Townsend, J.T. & Wenger, M.J. (2004). A theory of interactive parallel processing: New capacity measures and predictions for a response time inequality series. \emph{Psychological Review, 111}, 1003-1035.
+
+Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity Analysis.  \emph{Journal of Mathematical Psychology, 56}, 341-355.
 }
 \author{
-Joe Houpt <jhoupt@indiana.edu>
+Joe Houpt <joseph.houpt@wright.edu>
 }
 
 \seealso{
