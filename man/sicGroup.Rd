@@ -38,6 +38,8 @@ Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary per
 Houpt, J.W. & Townsend, J.T. (2010). The statistical properties of the survivor interaction contrast. \emph{Journal of Mathematical Psychology, 54}, 446-453.
 
 Heathcote, A., Brown, S.D., Wagenmakers, E-J. & Eidels, A. (2010) Distribution-free tests of stochastic dominance for small samples. \emph{Journal of Mathematical Psychology, 54}, 454-463. 
+
+Houpt, J.W., Blaha, L.M., McIntire, J.P., Havig, P.R. and Townsend, J.T. (2013). Systems Factorial Technology with R. \emph{Behavior Research Methods}.
 }
 \author{
 Joe Houpt <joseph.houpt@wright.edu>

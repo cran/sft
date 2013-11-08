@@ -37,8 +37,11 @@ ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
       for (i in 1:Nt ) {Ymat[j,i] <- sum(RTmat[index==j,1] >= tvec[i]) }
     }
 
-    # Create a weighting function based on the uncertainty for the estimator
-    Wv <- Ymat[1,]*( apply(Ymat[2:ncond,], 2, sum)) / apply(Ymat, 2, sum)
+    if (ncond > 2) {
+      Wv <- Ymat[1,]*( apply(Ymat[2:ncond,], 2, sum)) / apply(Ymat, 2, sum)
+    } else {
+      Wv <- Ymat[1,]*( Ymat[2:ncond,]) / apply(Ymat, 2, sum)
+    }
 
     # Calculate the numerator ( the difference of the weighted true AV performance
     #   and the weighted predicted UCIP performance
@@ -62,7 +65,11 @@ ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
     for (j in 1:ncond) { 
       for (i in 1:Nt ) {Gmat[j,i] <- sum(RTmat[RTmat[,3]==j,1] <= tvec[i]) }
     }
-    Wv <- Gmat[1,]*( apply(Gmat[2:ncond,], 2, sum)) / apply(Gmat, 2, sum)
+    if (ncond > 2) {
+      Wv <- Gmat[1,]*( apply(Gmat[2:ncond,], 2, sum)) / apply(Gmat, 2, sum)
+    } else {
+      Wv <- Gmat[1,]*( Gmat[2:ncond,]) / apply(Gmat, 2, sum)
+    }
     numer <- -1 * sum(Wv[cond.s==1&cr.s==1]/Gmat[1,cond.s==1&cr.s==1])
     for (i in 2:ncond) {
       numer <- numer + sum(Wv[cond.s==i&cr.s==1]/Gmat[i,cond.s==i&cr.s==1])

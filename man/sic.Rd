@@ -39,6 +39,8 @@ This function also performs a statistical analysis to determine whether the posi
 Townsend, J.T. & Nozawa, G. (1995). Spatio-temporal properties of elementary perception: An investigation of parallel, serial and coactive theories. \emph{Journal of Mathematical Psychology, 39}, 321-360.
 
 Houpt, J.W. & Townsend, J.T. (2010). The statistical properties of the survivor interaction contrast. \emph{Journal of Mathematical Psychology, 54}, 446-453.
+
+Houpt, J.W., Blaha, L.M., McIntire, J.P., Havig, P.R. and Townsend, J.T. (2013). Systems Factorial Technology with R. \emph{Behavior Research Methods}.
 }
 \author{
 Joe Houpt <joseph.houpt@wright.edu>
@@ -59,7 +61,8 @@ SerialAND.hh <- T1.h + T2.h
 SerialAND.hl <- T1.h + T2.l
 SerialAND.lh <- T1.l + T2.h
 SerialAND.ll <- T1.l + T2.l
-SerialAND.sic <- sic(HH=SerialAND.hh, HL=SerialAND.hl, LH=SerialAND.lh, LL=SerialAND.ll)
+SerialAND.sic <- sic(HH=SerialAND.hh, HL=SerialAND.hl, LH=SerialAND.lh, 
+  LL=SerialAND.ll)
 print(SerialAND.sic$Dvals)
 plot(SerialAND.sic$SIC, do.p=FALSE, ylim=c(-1,1))
 
@@ -76,7 +79,8 @@ ParallelAND.hh <- pmax(T1.h, T2.h)
 ParallelAND.hl <- pmax(T1.h, T2.l)
 ParallelAND.lh <- pmax(T1.l, T2.h)
 ParallelAND.ll <- pmax(T1.l, T2.l)
-ParallelAND.sic <- sic(HH=ParallelAND.hh, HL=ParallelAND.hl, LH=ParallelAND.lh, LL=ParallelAND.ll)
+ParallelAND.sic <- sic(HH=ParallelAND.hh, HL=ParallelAND.hl, LH=ParallelAND.lh, 
+  LL=ParallelAND.ll)
 print(ParallelAND.sic$Dvals)
 plot(ParallelAND.sic$SIC, do.p=FALSE, ylim=c(-1,1))
 
@@ -84,7 +88,8 @@ ParallelOR.hh <- pmin(T1.h, T2.h)
 ParallelOR.hl <- pmin(T1.h, T2.l)
 ParallelOR.lh <- pmin(T1.l, T2.h)
 ParallelOR.ll <- pmin(T1.l, T2.l)
-ParallelOR.sic <- sic(HH=ParallelOR.hh, HL=ParallelOR.hl, LH=ParallelOR.lh, LL=ParallelOR.ll)
+ParallelOR.sic <- sic(HH=ParallelOR.hh, HL=ParallelOR.hl, LH=ParallelOR.lh, 
+  LL=ParallelOR.ll)
 print(ParallelOR.sic$Dvals)
 plot(ParallelOR.sic$SIC, do.p=FALSE, ylim=c(-1,1))
 }
