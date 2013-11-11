@@ -1,27 +1,27 @@
 fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR = TRUE, ratio=TRUE, plotPCs=FALSE, ...) {
-  subjects <- sort(unique(DataTable$Subject))
+  subjects <- sort(unique(sftData$Subject))
   nsubjects <- length(subjects)
-  conditions <- sort(unique(DataTable$Condition))
+  conditions <- sort(unique(sftData$Condition))
   nconditions <- length(conditions)
   subj.out <- character()
   cond.out <- character()
 
-  channels <- grep("Channel", names(DataTable), value=T)
+  channels <- grep("Channel", names(sftData), value=T)
   nchannels <- length(channels)
 
   # Currently only does present versus absent
   #  To be implemented:  separate tests for each factorial
   #  salience condition;  Negative numbers for distractor
   for ( ch in channels ) {
-      #DataTable[,ch] <- DataTable[,ch] != 0
-    if(is.factor(DataTable[,ch])) {
-      DataTable[,ch] <- as.numeric(levels(DataTable[,ch]))[DataTable[,ch]]
+      #sftData[,ch] <- sftData[,ch] != 0
+    if(is.factor(sftData[,ch])) {
+      sftData[,ch] <- as.numeric(levels(sftData[,ch]))[sftData[,ch]]
     }
-    DataTable <- subset(DataTable, DataTable[,ch] >=0)
+    sftData <- subset(sftData, sftData[,ch] >=0)
   }
 
-  tvec <- seq(quantile(DataTable$RT,.001), quantile(DataTable$RT,.999), 
-              length.out=1000)# - median(DataTable$RT)
+  tvec <- seq(quantile(sftData$RT,.001), quantile(sftData$RT,.999), 
+              length.out=1000)# - median(sftData$RT)
 
   midpoint <- floor(length(tvec)/2)
 
@@ -48,7 +48,7 @@ fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR = TRUE, ratio=T
   # Calculate capacity for each participant in each condition
   for ( cn in 1:nconditions ) {
     if (is.factor(conditions)) {cond <- levels(conditions)[cn]} else {cond <- conditions[cn] }
-    condsubjects <- factor(with(DataTable, sort(unique(Subject[Condition==cond]))))
+    condsubjects <- factor(with(sftData, sort(unique(Subject[Condition==cond]))))
     ncondsubjects <- length(condsubjects)
     for ( sn in 1:ncondsubjects ) {
       if (is.factor(condsubjects)) {subj <- levels(condsubjects)[sn]} else {subj <- condsubjects[sn] }
@@ -56,20 +56,20 @@ fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR = TRUE, ratio=T
       subjVec <- c(subjVec, subj)
       condVec <- c(condVec, cond)
 
-      ds <- DataTable$Subject==subj & DataTable$Condition==cond
+      ds <- sftData$Subject==subj & sftData$Condition==cond
 
       # Redundant Target Response Times
-      usechannel <- ds & apply(DataTable[,channels]>0, 1, all)
-      RTlist[[1]] <- DataTable$RT[usechannel]
-      CRlist[[1]] <- DataTable$Correct[usechannel]
+      usechannel <- ds & apply(sftData[,channels]>0, 1, all)
+      RTlist[[1]] <- sftData$RT[usechannel]
+      CRlist[[1]] <- sftData$Correct[usechannel]
       
 
       # Single Target Response Times
       for ( ch in 1:nchannels ) {
-        usechannel <- ds & DataTable[,channels[ch]]>0 & 
-                      apply(as.matrix(DataTable[,channels[-ch]]==0), 1, all)
-        RTlist[[ch+1]] <- DataTable$RT[usechannel]
-        CRlist[[ch+1]] <- DataTable$Correct[usechannel]
+        usechannel <- ds & sftData[,channels[ch]]>0 & 
+                      apply(as.matrix(sftData[,channels[-ch]]==0), 1, all)
+        RTlist[[ch+1]] <- sftData$RT[usechannel]
+        CRlist[[ch+1]] <- sftData$Correct[usechannel]
       }
 
 
