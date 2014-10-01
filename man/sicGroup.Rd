@@ -17,6 +17,7 @@ sicGroup(inData, sictest = "ks", domtest = "ks", plotSIC=TRUE, ...)
   \item{...}{Arguments to be passed to plot function.}
 }
 \details{
+%  TO DO:  Add details of sftData format
 See the help page for the \code{\link{sic}} function for details of the survivor interaction contrast.
 }
 \value{

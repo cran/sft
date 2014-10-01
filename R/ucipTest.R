@@ -1,7 +1,14 @@
-ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
+ucip.test <- function(RT, CR=NULL, OR=NULL, stopping.rule=c("OR","AND","STST"))  {
   METHOD <- "Houpt-Townsend UCIP test"
   DNAME <- deparse(substitute(RT))
 
+  if (is.null(OR)) {
+    rule <- match.arg(stopping.rule, c("OR","AND","STST"))
+  } else if (OR ==TRUE) {
+    rule <- "OR"
+  } else {
+    rule <- "AND"
+  }
   ncond <- length(RT) 
   allRT <- c(RT, recursive=TRUE)
   if ( is.null(CR) ) {
@@ -24,7 +31,7 @@ ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
   cond.s <- RTmat[RT.sort$ix,3]
   tvec <- RT.sort$x
   
-  if (OR) {
+  if (rule=="OR") {
     ALTERNATIVE <- "response times are different than those predicted by the UCIP-OR model"
 
     # Y is the number of response times that have not yet occurred
@@ -59,7 +66,11 @@ ucip.test <- function(RT, CR=NULL, OR=TRUE)  {
     denom <- sqrt(denom)
           
   } else {
+    if (rule=="AND") {
     ALTERNATIVE <- "response times are different than those predicted by the UCIP-AND model"
+    } else if (rule=="STST") {
+    ALTERNATIVE <- "response times are different than those predicted by the UCIP-STST model"
+    }
     Garr <- rep(0, Nt)
     Gmat <- matrix(0, ncond, Nt)
     for (j in 1:ncond) { 

@@ -19,7 +19,7 @@ capacity.stst <- function (RT, CR = NULL, ratio = TRUE)
     return(list(Ct = C.stst, Ctest = rmtest))
   }
   else {
-    C.stst <- numer$K(times) - denom$K(times)
+    C.stst <- denom$K(times) - numer$K(times) 
     C.stst <- approxfun(c(0, times), c(0, C.stst))
     Var.stst <- numer$Var(times) + denom$Var(times)
     Var.stst <- approxfun(c(0, times), c(0, Var.stst))

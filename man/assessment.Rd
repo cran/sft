@@ -7,13 +7,14 @@ Workload Assessment Functions
 Calculates the Workload Assessment Functions
 }
 \usage{
-assessment(RT, CR, OR=c(TRUE, FALSE), correct=c(TRUE, FALSE), 
+assessment(RT, CR, OR=NULL, stopping.rule=c("OR","AND"), correct=c(TRUE, FALSE), 
   fast=c(TRUE, FALSE), detection=TRUE) 
 }
 \arguments{
   \item{RT}{A list of response time arrays.  The first array in the list is assumed to be the exhaustive condition.}
   \item{CR}{A list of correct/incorrect indicator arrays.  If NULL, assumes all are correct.}
-  \item{OR}{Indicates whether to compare performance to an OR or AND processing baseline.}
+  \item{OR}{Indicates whether to compare performance to an OR or AND processing baseline.  Provided for backwards compatibility for package version < 2. }
+  \item{stopping.rule}{Indicates whether to compare performance to an OR or AND processing baseline.}
   \item{correct}{Indicates whether to assess performance on correct trials.}
   \item{fast}{Indicates whether to use cumulative distribution functions or survivor functions to assess performance.}
   \item{detection}{Indicates whether to use a detection task baseline or a discrimination task baseline.}
@@ -68,10 +69,10 @@ RT.12[!c1Correct & !c2Correct] <- pmax(c1i.12, c2i.12)[!c1Correct & !c2Correct]
 
 RT <- list(RT.12, RT.1, RT.2)
 CR <- list(CR.12, CR.1, CR.2)
-a.or.cf <- assessment(RT, CR, OR=TRUE, correct=TRUE, fast=TRUE, detection=TRUE)
-a.or.cs <- assessment(RT, CR, OR=TRUE, correct=TRUE, fast=FALSE, detection=TRUE)
-a.or.if <- assessment(RT, CR, OR=TRUE, correct=FALSE, fast=TRUE, detection=TRUE)
-a.or.is <- assessment(RT, CR, OR=TRUE, correct=FALSE, fast=FALSE, detection=TRUE)
+a.or.cf <- assessment(RT, CR, stopping.rule="OR", correct=TRUE, fast=TRUE, detection=TRUE)
+a.or.cs <- assessment(RT, CR, stopping.rule="OR", correct=TRUE, fast=FALSE, detection=TRUE)
+a.or.if <- assessment(RT, CR, stopping.rule="OR", correct=FALSE, fast=TRUE, detection=TRUE)
+a.or.is <- assessment(RT, CR, stopping.rule="OR", correct=FALSE, fast=FALSE, detection=TRUE)
 
 par(mfrow=c(2,2))
 plot(a.or.cf, ylim=c(0,2))
@@ -90,10 +91,10 @@ RT.12[!c1Correct & !c2Correct] <- pmin(c1i.12, c2i.12)[!c1Correct & !c2Correct]
 
 RT <- list(RT.12, RT.1, RT.2)
 CR <- list(CR.12, CR.1, CR.2)
-a.and.cf <- assessment(RT, CR, OR=FALSE, correct=TRUE, fast=TRUE, detection=TRUE)
-a.and.cs <- assessment(RT, CR, OR=FALSE, correct=TRUE, fast=FALSE, detection=TRUE)
-a.and.if <- assessment(RT, CR, OR=FALSE, correct=FALSE, fast=TRUE, detection=TRUE)
-a.and.is <- assessment(RT, CR, OR=FALSE, correct=FALSE, fast=FALSE, detection=TRUE)
+a.and.cf <- assessment(RT, CR, stopping.rule="AND", correct=TRUE, fast=TRUE, detection=TRUE)
+a.and.cs <- assessment(RT, CR, stopping.rule="AND", correct=TRUE, fast=FALSE, detection=TRUE)
+a.and.if <- assessment(RT, CR, stopping.rule="AND", correct=FALSE, fast=TRUE, detection=TRUE)
+a.and.is <- assessment(RT, CR, stopping.rule="AND", correct=FALSE, fast=FALSE, detection=TRUE)
 
 par(mfrow=c(2,2))
 plot(a.and.cf, ylim=c(0,2))

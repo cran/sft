@@ -6,10 +6,10 @@
 #if assume.ID=TRUE, then RT only needs to be a vector or the first entry of RT is used
 
 
-estimate.bounds <- function (RT, CR = NULL, stopping.rule = c("or","and","stst"), assume.ID=FALSE,
+estimate.bounds <- function (RT, CR = NULL, stopping.rule = c("OR","AND","STST"), assume.ID=FALSE,
                              numchannels=NULL, unified.space=FALSE) 
 {
-  rule <- match.arg(stopping.rule, c("or","and","stst"))
+  rule <- match.arg(stopping.rule, c("OR","AND","STST"))
   
   nconds <- length(RT) #total number of input RTs
   n.channels <- numchannels
@@ -48,7 +48,7 @@ estimate.bounds <- function (RT, CR = NULL, stopping.rule = c("or","and","stst")
   }
   
   #given the stopping rule, estimate the CDF bounds
-  if (rule == "or"){  
+  if (rule == "OR"){  
     #two channel bounds
     if (n.channels == 2){
       if (assume.ID){
@@ -121,9 +121,9 @@ estimate.bounds <- function (RT, CR = NULL, stopping.rule = c("or","and","stst")
         upper <- log(upper)/log(ucip)
         lower <- log(lower)/log(ucip)
       }
-    }#end (rule=="or")
+    }#end (rule=="OR")
     
-    else if (rule == "and"){
+    else if (rule == "AND"){
       if (n.channels == 2) {
         if (assume.ID){
           upper <- Gmat[,1]
@@ -168,7 +168,7 @@ estimate.bounds <- function (RT, CR = NULL, stopping.rule = c("or","and","stst")
         lower <- log(ucip)/log(lower)
       }
     }
-    else if (rule == "stst"){
+    else if (rule == "STST"){
       if (assume.ID){
         upper <- n.channels * Gmat[,1]
         lower <- Gmat[,1]^(n.channels)

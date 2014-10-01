@@ -1,48 +1,61 @@
-capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
+capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, OR=NULL, stopping.rule=c("OR", "AND", "STST"), plotCt=TRUE, ...) {
   subjects <- sort(unique(inData$Subject))
+  subjects <- factor(subjects)
   nsubjects <- length(subjects)
 
   conditions <- sort(unique(inData$Condition))
+  conditions <- factor(conditions)
   nconditions <- length(conditions)
 
   channels <- grep("Channel", names(inData), value=T)
   nchannels <- length(channels)
-
-  if (mean(inData$RT) > 100) { 
-    times <- sort(unique(round(inData$RT)))
-  } else{
-    times <- sort(unique(inData$RT))
+  if(nchannels < 2) {
+    stop("Not enough channels for capacity analysis.")
   }
 
-  caporlist <- vector("list")
-  capandlist <- vector("list")
-  capormodel <- character()
-  capandmodel <- character()
+  # For backward compatibility
+  if (!is.null(OR)) {
+    if (OR) {
+      capacity <- capacity.or
+    } else {
+      capacity <- capacity.and 
+    }
+  } else {
+    rule <- match.arg(stopping.rule, c("OR","AND","STST"))
+    if(rule == "OR") {
+      capacity <- capacity.or
+    } else if (rule == "AND") {
+      capacity <- capacity.and 
+    } else if (rule == "STST"){
+      capacity <- capacity.stst
+    } else  {
+      stop("Please choose a valid stopping rule for fPCAcapacity.")
+    }
+  }
+
+  times <- seq(quantile(inData$RT,.001), quantile(inData$RT,.999), 
+              length.out=1000)
+
+  caplist <- vector("list")
+  capmodel <- character()
 
 
   subj.out <- character()
   cond.out <- character()
   subj.out.g <- character()
   cond.out.g <- character()
-  capORMat <- numeric()
-  capANDMat <- numeric()
+  capMat <- numeric()
   if(!ratio) {
-    varORMat <- numeric()
-    varANDMat <- numeric()
+    varMat <- numeric()
   }
 
-  capORMat <- numeric()
-  capANDMat <- numeric()
-
-  devmatOR <- matrix(NA, nconditions, ceiling(nsubjects/9))
-  devmatAND <- matrix(NA, nconditions, ceiling(nsubjects/9))
+  devmat <- matrix(NA, nconditions, ceiling(nsubjects/9))
 
   RTlist <- vector("list", nchannels)
   CRlist <- vector("list", nchannels)
 
   for ( cn in 1:nconditions ) {
-    Zor <- numeric()
-    Zand <- numeric()
+    Zscore <- numeric()
     m <- 0
     if (is.factor(conditions)) {cond <- levels(conditions)[cn]} else {cond <- conditions[cn] }
     #cond <- conditions[cn]
@@ -62,124 +75,98 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
         if(plotCt) {
           dev.new()
           par(mfrow=c(3,3))
-          devmatOR[cn,m] <- dev.cur()
-
-          dev.new()
-          par(mfrow=c(3,3))
-          devmatAND[cn,m] <- dev.cur()
         }
       }
 
       ds <- inData$Subject==subj & inData$Condition==cond
       #if ( sum(ds) ==0 ) { next };
       good1 <- TRUE
-      usechannel <- ds & apply(inData[,channels]>0, 1, all)
-
-      RTlist[[1]] <- inData$RT[usechannel]
-      CRlist[[1]] <- inData$Correct[usechannel]
 
 
-      if(mean(CRlist[[1]]) < acc.cutoff | sum(CRlist[[1]]) < 10) {
-        good1 <- FALSE 
-      }
+      if(rule =="STST") {
+        usechannel <- ds &  (apply(inData[,channels]>0, 1, sum)==1) & (apply(inData[,channels]<0, 1, sum)>0)
+        RTlist[[1]] <- inData$RT[usechannel]
+        CRlist[[1]] <- inData$Correct[usechannel]
+        if(mean(CRlist[[1]]) < acc.cutoff | sum(CRlist[[1]]) < 10) {
+          good1 <- FALSE 
+        }
 
-      for ( ch in 1:nchannels ) {
-        usechannel <- ds & inData[,channels[ch]]>0 & 
-                      apply(as.matrix(inData[,channels[-ch]]==0), 1, all)
-        RTlist[[ch+1]] <- inData$RT[usechannel]
-        CRlist[[ch+1]] <- inData$Correct[usechannel]
-        if(mean(CRlist[[ch+1]]) < acc.cutoff | sum(CRlist[[ch+1]]) < 10) {
-            good1 <- FALSE
+        usechannel <- ds & apply(inData[,channels]>=0, 1, all) & (apply(inData[,channels]!=0, 1, sum)==1)
+        RTlist[[2]] <- inData$RT[usechannel]
+        CRlist[[2]] <- inData$Correct[usechannel]
+        if(mean(CRlist[[2]]) < acc.cutoff | sum(CRlist[[2]]) < 10) {
+          good1 <- FALSE 
+        }
+
+      } else {
+        usechannel <- ds & apply(inData[,channels]>0, 1, all)
+        RTlist[[1]] <- inData$RT[usechannel]
+        CRlist[[1]] <- inData$Correct[usechannel]
+        if(mean(CRlist[[1]]) < acc.cutoff | sum(CRlist[[1]]) < 10) {
+          good1 <- FALSE 
+        }
+
+        for ( ch in 1:nchannels ) {
+          usechannel <- ds & inData[,channels[ch]]>0 & 
+                        apply(as.matrix(inData[,channels[-ch]]==0), 1, all)
+          RTlist[[ch+1]] <- inData$RT[usechannel]
+          CRlist[[ch+1]] <- inData$Correct[usechannel]
+          if(mean(CRlist[[ch+1]]) < acc.cutoff | sum(CRlist[[ch+1]]) < 10) {
+              good1 <- FALSE
+          }
         }
       }
+
+
+
 
       if( good1 ) {
         n <- length(subj.out)
-        caporlist[[n]] <- capacity.or(RT=RTlist, CR=CRlist, ratio=ratio)
-        Zor <- c(Zor, caporlist[[n]]$Ctest$statistic)
-        if(caporlist[[n]]$Ctest$p.value < .05) {
-          if(caporlist[[n]]$Ctest$statistic < 0) {
-            capormodel <- c(capormodel, "Limited")
+        caplist[[n]] <- capacity(RT=RTlist, CR=CRlist, ratio=ratio)
+        Zscore <- c(Zscore, caplist[[n]]$Ctest$statistic)
+        if(caplist[[n]]$Ctest$p.value < .05) {
+          if(caplist[[n]]$Ctest$statistic < 0) {
+            capmodel <- c(capmodel, "Limited")
           } else {
-            capormodel <- c(capormodel, "Super")
+            capmodel <- c(capmodel, "Super")
           }
         } else {
-          capormodel <- c(capormodel, "Nonsignificant")
+          capmodel <- c(capmodel, "Nonsignificant")
         }
 
-        capORMat <- rbind(capORMat, caporlist[[n]]$Ct(times))
+        capMat <- rbind(capMat, caplist[[n]]$Ct(times))
         if(!ratio) {
-          varORMat <- rbind(varORMat, caporlist[[n]]$Var(times))
-        }
-
-
-        capandlist[[n]] <- capacity.and(RT=RTlist, CR=CRlist, ratio=ratio)
-        Zand <- c(Zand,capandlist[[n]]$Ctest$statistic)
-        if(capandlist[[n]]$Ctest$p.value < .05) {
-          if(capandlist[[n]]$Ctest$statistic < 0) {
-            capandmodel <- c(capandmodel, "Limited")
-          } else {
-            capandmodel <- c(capandmodel, "Super")
-          }
-        } else {
-          capandmodel <- c(capandmodel, "Nonsignificant")
-        }
-
-        capANDMat <- rbind(capANDMat, capandlist[[n]]$Ct(times))
-        if(!ratio) {
-          varANDMat <- rbind(varANDMat, capandlist[[n]]$Var(times))
+          varMat <- rbind(varMat, caplist[[n]]$Var(times))
         }
 
         if(plotCt) {
-          dev.set(devmatOR[cn,m])
-          plot(times, tail(capORMat,1), type='l',
+          plot(times, tail(capMat,1), type='l',
               xlab="Time", ylab="C(t)",
               main=paste(cond, "\nParticipant ", subj, sep=""),...)
           if(ratio) {
             abline(1,0, lwd=2)
           } else {
-            lines(times, tail(capORMat,1)+1.96*sqrt(tail(varORMat,1)), lty=2)
-            lines(times, tail(capORMat,1)-1.96*sqrt(tail(varORMat,1)), lty=2)
+            lines(times, tail(capMat,1)+1.96*sqrt(tail(varMat,1)), lty=2)
+            lines(times, tail(capMat,1)-1.96*sqrt(tail(varMat,1)), lty=2)
             abline(0,0, lwd=2)
           } 
           
-
-          dev.set(devmatAND[cn,m])
-          plot(times, tail(capANDMat,1), type='l',
-              xlab="Time", ylab="C(t)",
-              main=paste(cond, "\nParticipant ", subj, sep=""),...)
-          if(ratio) {abline(1,0, lwd=2)} else{
-            lines(times, tail(capANDMat,1)+1.96*sqrt(tail(varANDMat,1)), lty=2)
-            lines(times, tail(capANDMat,1)-1.96*sqrt(tail(varANDMat,1)), lty=2)
-            abline(0,0, lwd=2)
-          } 
         }
 
       } else {
 
-        capormodel <- c(capormodel, NA)
-        capORMat <- rbind(capORMat, rep(NA, length(times)) )
+        capmodel <- c(capmodel, NA)
+        capMat <- rbind(capMat, rep(NA, length(times)) )
         if(!ratio){
-          varORMat <- rbind(varORMat, rep(NA, length(times)) )
-        }
-        capandmodel <- c(capandmodel, NA)
-        capANDMat <- rbind(capANDMat, rep(NA, length(times)) )
-        if(!ratio){
-          varANDMat <- rbind(varANDMat, rep(NA, length(times)) )
+          varMat <- rbind(varMat, rep(NA, length(times)) )
         }
 
         if(plotCt) {
-          dev.set(devmatOR[cn,m])
           plot(c(min(times),max(times)), c(1,1), type='l', lwd=2,
               xlab="Time", ylab="C(t)",
               main=paste(cond, "\nParticipant ", subj, sep=""),...) 
           text(mean(c(max(times),min(times))),1.2,"Not enough correct.",col='red')
 
-          dev.set(devmatAND[cn,m])
-          plot(c(min(times),max(times)), c(1,1), type='l', lwd=2,
-              xlab="Time", ylab="C(t)",
-              main=paste(cond, "\nParticipant ", subj, sep=""),...) 
-          text(mean(c(max(times),min(times))),1.2,"Not enough correct.",col='red')
         }
       }
     }
@@ -187,66 +174,45 @@ capacityGroup <- function(inData, acc.cutoff=.9, ratio=TRUE, plotCt=TRUE, ...) {
     if(plotCt) {
       dev.new()
       if(sum(cond.out==cond) > 1) {
-        matplot(times, t(capORMat[cond.out==cond,]), type='l', lty=1,
-          main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+        matplot(times, t(capMat[cond.out==cond,]), type='l', lty=1,
+          main=paste(cond, paste(rule, "Capacity"),sep="\n"), xlab="Time",ylab="C(t)",...)
         if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
 
-        dev.new()
-        matplot(times, t(capANDMat[cond.out==cond,]), type='l', lty=1,
-          main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
-        if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
       } else {
-        plot(times, capORMat[cond.out==cond,], type='l', lty=1,
-          main=paste(cond,"OR Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
+        plot(times, capMat[cond.out==cond,], type='l', lty=1,
+          main=paste(cond, paste(rule, "Capacity"),sep="\n"), xlab="Time",ylab="C(t)",...)
         if(ratio) {abline(1,0, lwd=2)} else{abline(0,0, lwd=2)} 
-
-        dev.new()
-        plot(times, capANDMat[cond.out==cond,], type='l', lty=1,
-          main=paste(cond,"AND Capacity",sep="\n"), xlab="Time",ylab="C(t)",...)
       }
 
     }
 
     subj.out.g <- c(subj.out.g, "Group")
     cond.out.g <- c(cond.out.g, cond)
-    mZor <- mean(Zor, na.rm=TRUE)
-    nZor <- sum(!is.na(Zor))
-    pZor <- pnorm(mZor * sqrt(nZor))
-    if( (pZor < .025) | (pZor > .975) )  {
-      if(mZor < 0) {
-        capormodel <- c(capormodel, "Limited")
+    mZscore <- mean(Zscore, na.rm=TRUE)
+    nZscore <- sum(!is.na(Zscore))
+    pZscore <- t.test(Zscore)$p.value
+    if( (pZscore < .025) | (pZscore > .975) )  {
+      if(mZscore < 0) {
+        capmodel <- c(capmodel, "Limited")
       } else {
-        capormodel <- c(capormodel, "Super")
+        capmodel <- c(capmodel, "Super")
       }
     } else {
-      capormodel <- c(capormodel, "Nonsignificant")
+      capmodel <- c(capmodel, "Nonsignificant")
     }
 
-    mZand <- mean(Zand, na.rm=TRUE)
-    nZand <- sum(!is.na(Zand))
-    pZand <- pnorm(mZand * sqrt(nZand))
-    if( (pZand < .025) | (pZand > .975) ) {
-      if(mZand < 0) {
-        capandmodel <- c(capandmodel, "Limited")
-      } else {
-        capandmodel <- c(capandmodel, "Super")
-      }
-    } else {
-      capandmodel <- c(capandmodel, "Nonsignificant")
-    }
   }
 
   overview <- as.data.frame(list(Subject=subj.out.g, Condition=cond.out.g,
-      Ct.or=capormodel, Ct.and=capandmodel))
+      Capacity=capmodel))
 
   if(ratio){
     #return(list(statistic=Z, Ct.or=capORMat, Ct.and=capANDMat, times=times))
-    return(list(overview=overview, Ct.or.fn=capORMat, Ct.and.fn=capANDMat, capacity.or=caporlist, capacity.and=capandlist, times=times))
+    return(list(overview=overview, Ct.fn=capMat, Ct.fn=capMat, capacity=caplist, times=times))
   } else {
-    return(list(overview=overview, Ct.or.fn=capORMat, Ct.and.fn=capANDMat, Ct.or.var=varORMat, Ct.and.var=varANDMat, capacity.or=caporlist, capacity.and=capandlist, times=times))
+    return(list(overview=overview, Ct.fn=capMat, Ct.var=varMat, capacity=caplist, times=times))
     #return(list(statistic=Z, Ct.or=capORMat, Var.or=varORMat, Ct.and=capANDMat, Var.and=varANDMat, times=times))
   }
-
 
 }
 

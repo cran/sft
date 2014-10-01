@@ -7,13 +7,13 @@ Bounds on Response Time Cumulative Distribution Functions for Parallel Processin
 Calculates the bounds on the range of cumulative distribution functions for response time data for parallel processing models under specified stopping rules (OR, AND, or Single-Target Self-Terminating).
 }
 \usage{
-estimate.bounds(RT, CR = NULL, stopping.rule = c("or","and","stst"), 
+estimate.bounds(RT, CR = NULL, stopping.rule = c("OR","AND","STST"), 
   assume.ID=FALSE, numchannels=NULL, unified.space=FALSE)
 }
 \arguments{
   \item{RT}{A list of numeric response time arrays for the individual processing channels}
   \item{CR}{A list of correct/incorrect indicator arrays.  If NULL, assumes all are correct.}
-  \item{stopping.rule}{A character string specifying the stopping rule for the parallel processing model; must be one of "or", "and", "stst". If NULL, then "or" is the default model.}
+  \item{stopping.rule}{A character string specifying the stopping rule for the parallel processing model; must be one of "OR", "AND", "STST". If NULL, then "OR" is the default model.}
   \item{assume.ID}{A logical indicating whether the individual channel distributions are assumed to be Identically Distributed (ID). If FALSE, non-ID distributions are estimated from the RT data. If TRUE, only the first array in RT is used, together with numchannels, to estimate the distributions.}
   \item{numchannels}{Number of channels in the parallel processing model when all channels are active. If NULL,number channels will be estimated equal to length of RT.}
   \item{unified.space}{A logical indicating whether the unified capacity space version of the bounds should be estimated.}
@@ -25,7 +25,7 @@ Standard unlimited capacity parallel processing models for \eqn{n}{n} simultaneo
 
 
 
-\emph{stopping.rule="or"}
+\emph{stopping.rule="OR"}
 
 Let \eqn{F_{n}(t)=P[RT \le t]=P[min(T_{i}) \le t]}{F_n(t)=P[RT \le t]=P[min(T_i) \le t]} for \eqn{i=1,...,n}{i=1,...,n}, denote the cumulative distribution of response times under a minimum time (logical OR) stopping rule.
 The general bounds for n-channel parallel processing under an OR stopping rule are:
@@ -37,7 +37,7 @@ Under the assumption or conditions that the individual channels are identically 
 When the model under scrutiny has only \eqn{n=2}{n=2} channels, the inequality chain takes the form:
 \deqn{F^{i}_{1}(t) \le F_{2}(t) \le [F^{i}_{1}(t) + F^{j}_{1}(t)]}{F^{i}_{1}(t) \le F_{2}(t) \le [F^{i}_{1}(t) + F^{j}_{1}(t)].}
 
-\emph{stopping.rule="and"}
+\emph{stopping.rule="AND"}
 
 Let \eqn{G_{n}(t)=P[RT \le t]=P[max(T_i) \le t]}{G_n(t)=P[RT \le t]=P[max(T_i) \le t]}, for \eqn{i=1,...,n}{i=1,...,n}, denote the cumulative distribution of repsonse times under a maximum time (logical AND, ehxaustive) stopping rule.
 The general bounds for n-channel parallel processing under an AND stopping rule are:
@@ -49,7 +49,7 @@ Under the assumption or conditions that the individual channels are identically 
 When the model under scrutiny has only \eqn{n=2}{n=2} channels, the inequality chain takes the form:
 \deqn{[G^{i}_{1}(t) + G^{j}_{1}(t) - 1] \le G_{2}(t) \le G^{i}_{1}(t)}{[G^{i}_{1}(t) + G^{j}_{1}(t) - 1] \le G_{2}(t) \le G^{i}_{1}(t).}
 
-\emph{stopping.rule="stst"}
+\emph{stopping.rule="STST"}
 
 Let \eqn{F_{k}(t)=P[RT \le t]}{F_k(t)=P[RT \le t]} denote the cumulative distribution of repsonse times under a single-target self-terminating (STST) stopping rule, where the target of interest is on processing channel \eqn{k}{k} among \eqn{n}{n} active channels.
 The general bounds for n-channel parallel processing under an STST stopping rule are:

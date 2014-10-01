@@ -7,12 +7,13 @@ A Statistical Test for Super or Limited Capacity
 A nonparametric test for capacity values significantly different than those predicted by the estimated unlimited capacity, independent parallel model.
 }
 \usage{
-ucip.test(RT, CR=NULL, OR=TRUE)
+ucip.test(RT, CR=NULL, OR=NULL, stopping.rule=c("OR","AND","STST"))
 }
 \arguments{
   \item{RT}{A list of response time arrays.  The first array in the list is assumed to be the exhaustive condition.}
   \item{CR}{A list of correct/incorrect indicator arrays.  If NULL, assumes all are correct.}
-  \item{OR}{Logical indicating whether to test against OR (first terminating) or AND (exhaustive) performance.}
+  \item{OR}{Indicates whether to compare performance to an OR or AND processing baseline.  Provided for backwards compatibility for package version < 2. }
+  \item{stopping.rule}{Indicates whether to compare performance to an OR, AND or Single Target Self Terminating (STST) processing baseline.}
 }
 \details{
 The test is based on the Nelson-Aalen formulation of the log-rank test.  The function takes a weighted difference between estimated unlimited capacity, independent parallel performance, based on a participants single source response times, and the participants true performance when all sources are present.
@@ -54,16 +55,16 @@ CRlist <- list(CR.pp, CR.pa, CR.ap)
 RT.pp.limited <- pmin( rexp(100, .5*rate1), rexp(100, .5*rate2))
 RT.pp.unlimited <- pmin( rexp(100, rate1), rexp(100, rate2))
 RT.pp.super <- pmin( rexp(100, 2*rate1), rexp(100, 2*rate2))
-z.limited   <- ucip.test(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
-z.unlimited <- ucip.test(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
-z.super     <- ucip.test(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, OR=TRUE)
+z.limited   <- ucip.test(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, stopping.rule="OR")
+z.unlimited <- ucip.test(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, stopping.rule="OR")
+z.super     <- ucip.test(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, stopping.rule="OR")
 
 #  AND Processing
 RT.pp.limited <- pmax( rexp(100, .5*rate1), rexp(100, .5*rate2))
 RT.pp.unlimited <- pmax( rexp(100, rate1), rexp(100, rate2))
 RT.pp.super <- pmax( rexp(100, 2*rate1), rexp(100, 2*rate2))
-z.limited   <- ucip.test(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
-z.unlimited <- ucip.test(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
-z.super     <- ucip.test(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, OR=FALSE)
+z.limited   <- ucip.test(RT=list(RT.pp.limited, RT.pa, RT.ap), CR=CRlist, stopping.rule="AND")
+z.unlimited <- ucip.test(RT=list(RT.pp.unlimited, RT.pa, RT.ap), CR=CRlist, stopping.rule="AND")
+z.super     <- ucip.test(RT=list(RT.pp.super, RT.pa, RT.ap), CR=CRlist, stopping.rule="AND")
 }
 \keyword{ ~sft }

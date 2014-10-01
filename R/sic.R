@@ -1,9 +1,11 @@
 sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
 
   subjects <- sort(unique(inData$Subject))
+  subjects <- factor(subjects)
   nsubjects <- length(subjects)
 
   conditions <- sort(unique(inData$Condition))
+  conditions <- factor(conditions)
   nconditions <- length(conditions)
 
   SICnames <- c("ParallelOR", "ParallelAND", "SerialOR", "SerialAND", "Coactive")
@@ -83,7 +85,7 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
           if (sicList[[n]]$MIC$statistic > 0) {
             mic <- c(mic, "Positive")
           } else { mic <- c(mic, "Negative") }
-        } else {mic <- "Nonsignificant"}
+        } else {mic <- c(mic,"Nonsignificant")}
 
         if( sum(rejected.models)==0) {
           predicted <- c(predicted, SICnames[3]) # Serial OR
@@ -211,28 +213,37 @@ siDominance <- function(HH, HL, LH, LL, method="ks") {
 
 
 mic.test <- function(HH, HL, LH, LL, method=c("art","anova")) {
-  method <- match.arg(method)
+  method <- match.arg(method, c("art", "anova"))
   DNAME <- paste("\nHH:", deparse(substitute(HH)), "\tHL:", deparse(substitute(HL)), 
                  "\nLH:", deparse(substitute(LH)), "\tLL:", deparse(substitute(LL)) )
+
+  HH <- HH[!is.na(HH)]
+  HL <- HL[!is.na(HL)]
+  LH <- LH[!is.na(LH)]
+  LL <- LL[!is.na(LL)]
 
   STATISTIC <- (mean(LL) - mean(LH))  - (mean(HL) - mean(HH))
   names(STATISTIC) <- "MIC"
 
   allrt <- c(HH, HL, LH, LL)
+
   if (method=="art") {
     METHOD <- "Adjusted Rank Transform test of the MIC"
     n1 <- length(HH)
     n2 <- length(HL)
     n3 <- length(LH)
     n4 <- length(LL)
+
     h1 <- c(rep(1, n1+n2), rep(0,n3+n4))
     h2 <- c(rep(1, n1), rep(0, n2), rep(1,n3), rep(0, n4))
-    
+
     mA0 <- sum( allrt * (1-h1) ) / sum(1-h1)
     mA1 <- sum( allrt * h1 ) / sum(h1)
     mB0 <- sum( allrt * (1-h2) ) / sum(1-h2)
     mB1 <- sum( allrt * h2 ) / sum(h2)
+
     allrt.m <- allrt - (1-h1)*mA0- h1*mA1 - (1-h2)*mB0 - h2*mB1 
+    allrt.m <- round(allrt.m, 15)
     ranks <- rank(allrt.m, ties.method="average")
 
     stat <- anova(lm(ranks ~ h1*h2))
