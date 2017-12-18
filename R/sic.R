@@ -1,4 +1,5 @@
-sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
+sicGroup <- function(inData, sictest="ks", mictest=c("art", "anova"), domtest="ks", alpha.sic=.05, plotSIC=TRUE, ...) {
+
 
   subjects <- sort(unique(inData$Subject))
   subjects <- factor(subjects)
@@ -56,7 +57,7 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
         subj.out <- c(subj.out, subj)
         n <- n+1
   
-        sicList[[n]] <- sic(HH=HH, HL=HL, LH=LH, LL=LL)
+        sicList[[n]] <- sic(HH=HH, HL=HL, LH=LH, LL=LL, mictest=mictest)
         allSICfn <- rbind(allSICfn, sicList[[n]]$SIC(times))
 
 
@@ -70,17 +71,17 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
 
         rejected.models  <- rep(FALSE,5)
 
-        if (sicList[[n]]$SICtest$positive$p.value < .05) {
+        if (sicList[[n]]$SICtest$positive$p.value < alpha.sic) {
           rejected.models[c(2,3)] <- TRUE  # ParallelAND, SerialOR
           positive <- c(positive, "Significant")
         } else {positive <- c(positive, "Nonsignificant")}
 
-        if (sicList[[n]]$SICtest$negative$p.value < .05) {
+        if (sicList[[n]]$SICtest$negative$p.value < alpha.sic) {
           rejected.models[c(1,3)] <- TRUE # ParallelOR, SerialOR
           negative <- c(negative, "Significant")
         } else {negative <- c(negative, "Nonsignificant")}
 
-        if (sicList[[n]]$MIC$p.value < .05) {
+        if (sicList[[n]]$MIC$p.value < alpha.sic) {
           rejected.models[c(3,4)] <- TRUE # SerialOR, SerialAND
           if (sicList[[n]]$MIC$statistic > 0) {
             mic <- c(mic, "Positive")
@@ -89,7 +90,7 @@ sicGroup <- function(inData, sictest="ks", domtest="ks", plotSIC=TRUE, ...) {
 
         if( sum(rejected.models)==0) {
           predicted <- c(predicted, SICnames[3]) # Serial OR
-        } else if( sum(rejected.models)==1) {
+        } else if( sum(rejected.models)==4) {
           predicted <- c(predicted, SICnames[5]) # Coactive
         } else if( all(rejected.models[1:3] == c(0,1,1) ) ) {
           predicted <- c(predicted, SICnames[1]) # Parallel-OR

@@ -46,6 +46,8 @@ fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR=NULL, stopping.
     }
   }
 
+  if(rule=="STST") { nchannels <- 2 }
+
   tvec <- seq(quantile(sftData$RT,.001), quantile(sftData$RT,.999), 
               length.out=1000)
 
@@ -75,6 +77,7 @@ fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR=NULL, stopping.
     if (is.factor(conditions)) {cond <- levels(conditions)[cn]} else {cond <- conditions[cn] }
     condsubjects <- factor(with(sftData, sort(unique(Subject[Condition==cond]))))
     ncondsubjects <- length(condsubjects)
+    if (ncondsubjects ==0 ) { next; }
     for ( sn in 1:ncondsubjects ) {
       if (is.factor(condsubjects)) {subj <- levels(condsubjects)[sn]} else {subj <- condsubjects[sn] }
 
@@ -123,7 +126,7 @@ fPCAcapacity <- function(sftData, dimensions, acc.cutoff=.75, OR=NULL, stopping.
       if (register == "median") {
         registervals <- c(registervals, mean(median(RTlist[[1]], median(c(RTlist[2:nconditions],recursive=TRUE)))) )
         shiftn <- midpoint - max( which(tvec < tail(registervals,1)))
-      } else if (register == "median") {
+      } else if (register == "mean") {
         registervals <- c(registervals, mean(c(RTlist,recursive=TRUE)) )
         shiftn <- midpoint - max( which(tvec < tail(registervals,1)))
       } else {
