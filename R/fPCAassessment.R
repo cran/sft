@@ -51,7 +51,7 @@ fPCAassessment<- function(sftData, dimensions,
   times <- seq(quantile(sftData$RT,.001), quantile(sftData$RT,.999), 
               length.out=1000)
 
-  midpoint <- floor(length(times)/2)
+  midpoint <- 0# floor(length(times)/2)
   at.all.mat <- numeric()
   subj.vec <- c()
   cond.vec <- c()
@@ -169,7 +169,7 @@ fPCAassessment<- function(sftData, dimensions,
   }
 
   if(register != "none") {
-    times <- times - midpoint
+    times <- times - mean(registervals)
   }
   
   t.min <- min(times[!apply(is.na(at.all.mat), 2, all)])
@@ -239,7 +239,21 @@ fPCAassessment<- function(sftData, dimensions,
   }
 
   if(plotPCs) {
-    ylim=c(-1, mean(at.good.mn)+max(fac.mult.v))
+    y.upper1 <- max(at.good.mn+ 
+                   matrix(rep(fac.mult.v, length(t.good)), 
+                          length(t.good), dimensions, byrow=T) * harm.mat.v)
+    y.upper1 <- 1.1 * max(y.upper1, max(at.good.mn))
+    y.lower1 <- min(at.good.mn+ 
+                   matrix(rep(fac.mult.v, length(t.good)), 
+                          length(t.good), dimensions, byrow=T) * harm.mat.v)
+    y.lower1 <- 0.9 * min(y.lower1, min(at.good.mn))
+    ylim1=c(y.lower1, y.upper1)
+
+    y.upper2 <- max(matrix(rep(fac.mult.v, length(t.good)), 
+                          length(t.good), dimensions, byrow=T) * harm.mat.v)
+    y.lower2 <- min(matrix(rep(fac.mult.v, length(t.good)), 
+                          length(t.good), dimensions, byrow=T) * harm.mat.v)
+    ylim2=c(.9*y.lower2, 1.1*y.upper2)
     dev.new()
     par(mar=c(3.1, 3.1, 2.1, 1.1), mgp=c(1.75, .25, 0), 
         mfrow=c(dimensions, 3))
@@ -248,7 +262,7 @@ fPCAassessment<- function(sftData, dimensions,
                        floor(100*pca.str.good.varmx$varprop[ifac]), "%")
       fn.i <- at.good.mn + fac.mult.v[ifac]* harm.mat.v[,ifac]
       plot(t.good, fn.i, type='l', lty=2, main="", xlab="Time (Adjusted)", 
-           ylab="", ylim=ylim, xlim=c(t.min, t.max))
+           ylab="", ylim=ylim1, xlim=c(t.min, t.max))
       lines(t.good, at.good.mn)
       abline(0,0, col=grey(.4))
       mtext(mainstr, side=2, line=1)
@@ -259,7 +273,8 @@ fPCAassessment<- function(sftData, dimensions,
       }
 
       plot(t.good, fn.i - at.good.mn, type='l', main="", 
-           xlab="Time (Adjusted)", ylab="", ylim=ylim, xlim=c(t.min, t.max))
+           xlab="Time (Adjusted)", ylab="", ylim=ylim2, 
+           xlim=c(t.min, t.max))
       abline(0,0, col=grey(.4))
 
       if(ifac ==1) {
