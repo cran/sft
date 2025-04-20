@@ -41,13 +41,13 @@ Burns, D.M., Houpt, J.W., Townsend, J.T. & Endres, M.J. (2013).  Functional prin
 Ramsay, J., Hooker, J. & Graves, S. (2009).  Functional Data Analysis with R and MATLAB.  New York, NY:  Springer.
 }
 \author{
-Joe Houpt <joseph.houpt@wright.edu>
-Devin Burns <devburns@indiana.edu>
+Joe Houpt <joseph.houpt@utsa.edu>
+Devin Burns <burnsde@mst.edu>
 }
 \seealso{
 \code{\link{capacity.and}}
 \code{\link{capacity.or}}
-\code{\link{fda}}
+\code{\link[fda]{fda}}
 }
 \examples{
 \dontrun{

@@ -46,17 +46,17 @@ Townsend, J.T. and Altieri, N. (2012).  An accuracy-response time capacity asses
 
 }
 \author{
-Joe Houpt <joseph.houpt@wright.edu>
+Joe Houpt <joseph.houpt@utsa.edu>
 }
 \seealso{
 \code{\link{assessment}}
-\code{\link{fda}}
+\code{\link[fda]{fda}}
 }
 \examples{
 \dontrun{
 data(dots)
-fPCAassessment(dots, dimensions=2, stopping.rule="OR", correct=TRUE, fast=FALSE, 
-               detection=TRUE, plotPCs=TRUE)
+fPCAassessment(dots, dimensions=2, stopping.rule="OR", register="median",
+               correct=TRUE, fast=FALSE, detection=TRUE, plotPCs=TRUE)
 }
 }
 \keyword{ sft }

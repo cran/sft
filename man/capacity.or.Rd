@@ -16,7 +16,7 @@ capacity.or(RT, CR=NULL, ratio=TRUE)
 }
 \details{
 The OR capacity coefficient compares performance on task to an unlimited-capacity, independent, parallel (UCIP) model using cumulative hazard functions.  Suppose \eqn{H_i(t)}{Hi(t)} is the cumulative hazard function for response times when process \eqn{i}{i} is completed in isolation and \eqn{H_i(t)}{Hi(t)} is the cumulative hazard function for response times when all processes occur together and a response is made as soon as any of the processes finish.  Then the OR capacity coefficient is given by, 
-\deqn{C_{\rm OR}(t)=\frac{H_{\rm AND}(t)}{\sum_i H_i(t)}.}{Cor(t)=sum[Hor(t)]/[Hi(t)].}
+\deqn{C_{\rm OR}(t)=\frac{H_{\rm OR}(t)}{\sum_i H_i(t)}.}{Cor(t)=sum[Hor(t)]/[Hi(t)].}
 The denominator is the estimated cumulative hazard function for the UCIP model, based on the response times for each process in isolation and the numerator is the actual performance. 
 
 \eqn{C_{\rm OR}(t) <1}{Cor(t)<1} implies worse performance than the UCIP model.  This indicates that either there are limited processing resources, there is inhibition among the subprocesses, or the items are not processed in parallel (e.g., the items may be processed serially).
@@ -28,7 +28,7 @@ The difference form of the capacity coefficient is given by,
 }
 \value{
   \item{Ct}{An object of class approxfun representing the OR capacity coefficient.}
-  \item{Var}{An object of class approxfun representing the variance of the estimated AND capacity coefficient.  Only returned if ratio=FALSE.}
+  \item{Var}{An object of class approxfun representing the variance of the estimated OR capacity coefficient.  Only returned if ratio=FALSE.}
   \item{Ctest}{A list with class "htest" that is returned from \code{\link{ucip.test}} and contains the statistic and p-value.}
 }
 \references{
@@ -39,7 +39,7 @@ Houpt, J.W. & Townsend, J.T. (2012). Statistical Measures for Workload Capacity 
 Houpt, J.W., Blaha, L.M., McIntire, J.P., Havig, P.R. and Townsend, J.T. (2013). Systems Factorial Technology with R. \emph{Behavior Research Methods}.
 }
 \author{
-Joe Houpt <joseph.houpt@wright.edu>
+Joe Houpt <joseph.houpt@utsa.edu>
 }
 \seealso{
 \code{\link{ucip.test}}

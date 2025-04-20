@@ -100,3 +100,68 @@ ucip.test <- function(RT, CR=NULL, OR=NULL, stopping.rule=c("OR","AND","STST")) 
   class(rval) <- "htest"
   return(rval)
 }
+
+ucip.id.test <- function(dt.rt, nt.rt, st.rts, dt.cr=NULL, nt.cr=NULL, st.crs=NULL) {
+  METHOD <- "Houpt-Townsend UCIP test"
+
+  n_single <- length(st.rts)
+
+  if ( is.null(dt.cr) ) { 
+    dt.cr <- rep(1, length(dt.rt))
+  } 
+  if ( is.null(nt.cr) ) { 
+    nt.cr <- rep(1, length(nt.rt))
+  } 
+  if ( is.null(st.crs) | (length(st.crs) != n_single) ) {
+    st.crs <- vector("list", n_single)
+    for( i in 1:n_single ) {
+      st.crs[[i]] <- rep(1, length(st.rts[[i]]))
+    }
+  } 
+
+  allRT <- c(dt.rt, nt.rt, c(st.rts, recursive=TRUE))
+  allCR <- c(dt.cr, nt.cr, c(st.crs, recursive=TRUE))
+  #allRT <- c(RT, recursive=TRUE)
+  Nt <- length(allRT)
+
+  index <- c(rep(1, length(dt.rt)), rep(2, length(nt.rt)))
+  for ( i in 1:n_single) {
+    index <- c(index, rep(i+2, length(st.rts[[i]])))
+  }
+
+  RTmat <- cbind( allRT, allCR, index)
+
+  RT.sort <- sort(RTmat[,1], index.return=TRUE)
+  cr.s <- RTmat[RT.sort$ix,2]
+  cond.s <- RTmat[RT.sort$ix,3]
+  tvec <- RT.sort$x
+  
+  ALTERNATIVE <- "response times are different than those predicted by the adjusted UCIP-AND model"
+  Garr <- rep(0, Nt)
+  Gmat <- matrix(0, 2+n_single, Nt)
+  for (j in 1:(2+n_single)) { 
+    for (i in 1:Nt ) {Gmat[j,i] <- sum(RTmat[RTmat[,3]==j,1] <= tvec[i]) }
+  }
+
+  Wv <- (Gmat[1,] + Gmat[2,])*(apply(Gmat[3:(2+n_single),], 2, sum)) / apply(Gmat, 2, sum)
+
+  numer <- -1 * (sum(Wv[cond.s==1&cr.s==1]/Gmat[1,cond.s==1&cr.s==1]) + 
+		 sum(Wv[cond.s==2&cr.s==1]/Gmat[2,cond.s==2&cr.s==1]))
+  for (i in 1:n_single) {
+    numer <- numer + sum(Wv[cond.s==(i+2)&cr.s==1]/Gmat[(i+2),cond.s==(i+2)&cr.s==1])
+  }
+  denom <- 0
+  for (i in 1:(2+n_single)) {
+    denom <- denom + sum((Wv[cond.s==i&cr.s==1]/Gmat[i,cond.s==i&cr.s==1])^2)
+  }
+  denom <- sqrt(denom)
+  
+  STATISTIC <- numer/denom
+  names(STATISTIC) = "z"
+
+  pval <- 2*min(pnorm(numer/denom),1-pnorm(numer/denom))
+  rval <- list(statistic=STATISTIC, p.value=pval, alternative=ALTERNATIVE,
+            method=METHOD)
+  class(rval) <- "htest"
+  return(rval)
+}
